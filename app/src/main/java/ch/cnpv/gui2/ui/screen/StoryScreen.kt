@@ -21,7 +21,7 @@ fun DuckStory(imageRes: Int?) {
     val painter = if (imageRes != null) {
         painterResource(id = imageRes)
     } else {
-        painterResource(id = R.mipmap.default_placeholder)
+        painterResource(id = R.drawable.default_placeholder)
     }
 
     Image(
@@ -34,6 +34,6 @@ fun DuckStory(imageRes: Int?) {
 @Composable
 fun DuckStoryPreview() {
     AppTheme {
-        DuckStory(imageRes = R.mipmap.default_placeholder)
+        DuckStory(imageRes = R.drawable.default_placeholder)
     }
 }
