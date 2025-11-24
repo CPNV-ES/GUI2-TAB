@@ -13,6 +13,7 @@ import ch.cnpv.gui2.ui.theme.AppTheme
 import androidx.compose.foundation.Image
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.layout.ContentScale
+import ch.cnpv.gui2.R
 
 
 @Composable
@@ -20,7 +21,7 @@ fun DuckStory(imageRes: Int?) {
     val painter = if (imageRes != null) {
         painterResource(id = imageRes)
     } else {
-        painterResource(id = R.drawable.ic_placeholder)
+        painterResource(id = R.mipmap.default_placeholder)
     }
 
     Image(
@@ -33,6 +34,6 @@ fun DuckStory(imageRes: Int?) {
 @Composable
 fun DuckStoryPreview() {
     AppTheme {
-        DuckStory(imageRes = R.drawable.ic_placeholder)
+        DuckStory(imageRes = R.mipmap.default_placeholder)
     }
 }
