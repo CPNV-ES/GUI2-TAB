@@ -1,19 +1,29 @@
 package ch.cnpv.gui2.ui.screen
 
+import android.R.id.primary
 import androidx.annotation.DrawableRes
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.outlined.AddCircle
 import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -21,6 +31,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
@@ -31,9 +42,12 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -46,7 +60,7 @@ fun MainScreen(onNavigateOtherClick: () -> Unit) {
     var selectedItem by remember { mutableIntStateOf(0) }
     val items = listOf("Accueil", "Publier", "Recherche")
     val icons = listOf(Icons.Filled.Menu, Icons.Outlined.AddCircle, Icons.Filled.Search)
-
+    val itemsCard = (1..100).toList()
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         topBar = {
@@ -101,6 +115,7 @@ fun MainScreen(onNavigateOtherClick: () -> Unit) {
             ) {
                 Text("Navigate to other screen")
             }
+            OutlinedCardPost(itemsCard)
         }
     }
 }
@@ -116,9 +131,9 @@ fun CarouselStories() {
     val carouselItems = remember {
         listOf(
             CarouselItem(0, R.drawable.profile1, "cupcake"),
-            CarouselItem(1, R.drawable.profile1, "donut"),
+            CarouselItem(1, R.drawable.profile2, "donut"),
             CarouselItem(2, R.drawable.profile1, "eclair"),
-            CarouselItem(3, R.drawable.profile1, "froyo"),
+            CarouselItem(3, R.drawable.profile2, "froyo"),
             CarouselItem(4, R.drawable.profile1, "gingerbread"),
         )
     }
@@ -140,6 +155,42 @@ fun CarouselStories() {
             contentDescription = item.contentDescription,
             contentScale = ContentScale.Fit
         )
+    }
+}
+
+@Composable
+fun OutlinedCardPost(items: List<Int>) {
+    LazyColumn(
+        modifier = Modifier
+            .padding(15.dp)
+            .wrapContentSize(Alignment.Center)
+            .fillMaxWidth()
+    ) {
+        items(items) { item ->
+            OutlinedCard(
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.surface,
+                ),
+                border = BorderStroke(1.dp, Color.Black),
+                modifier = Modifier
+                    .fillMaxWidth()
+
+            ) {
+                Text(
+                    text = "Post $item",
+                    modifier = Modifier
+                        .padding(5.dp),
+                    textAlign = TextAlign.Center,
+                )
+                Text(
+                    text = "Description $item",
+                    modifier = Modifier
+                        .padding(5.dp),
+                    textAlign = TextAlign.Center,
+                )
+            }
+        }
+
     }
 }
 
