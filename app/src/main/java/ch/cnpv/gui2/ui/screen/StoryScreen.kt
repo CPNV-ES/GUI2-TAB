@@ -39,8 +39,12 @@ fun StoryScreen(
     var step by remember { mutableStateOf(currentStep) }
     var progress by remember { mutableStateOf(0f) }
     val isPressed = remember { mutableStateOf(false)}
-    val previousScreen = {}
-    val nextScreen = {}
+    val previousScreen = {
+        if (step > 0) step --
+    }
+    val nextScreen = {
+        if (step < steps -1) step ++
+    }
 
     LaunchedEffect(step) {
         progress = 0f
