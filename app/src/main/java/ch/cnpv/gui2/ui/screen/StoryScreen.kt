@@ -14,19 +14,43 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-
+import androidx.compose.runtime.*
+import kotlinx.coroutines.delay
 import ch.cnpv.gui2.R
 
 
 @Composable
-fun StoryScreen(imageRes: Int?, progress : Float) {
+fun StoryScreen(
+    imageRes: Int?,
+    steps: Int = 4,
+    currentStep: Int = 0,
+    onFinished: () -> Unit = {}
+) {
     val painter = if (imageRes != null) {
         painterResource(imageRes)
     } else {
         painterResource(R.drawable.default_placeholder)
     }
 
-    Box(modifier = Modifier.fillMaxSize()) {
+    var step by remember { mutableStateOf(currentStep) }
+    var progress by remember { mutableStateOf(0f) }
+
+    LaunchedEffect(step) {
+        progress = 0f
+        while (progress < 1f) {
+            delay(50)
+            progress += 0.01f
+        }
+        if (step < steps - 1) {
+            step++
+        } else {
+            onFinished()
+        }
+    }
+
+    Box(
+        modifier = Modifier.fillMaxSize()
+    ) {
         Image(
             painter = painter,
             contentDescription = null,
@@ -35,6 +59,8 @@ fun StoryScreen(imageRes: Int?, progress : Float) {
         )
 
         StoryProgressBar(
+            steps = steps,
+            currentStep = step,
             progress = progress,
             modifier = Modifier.align(Alignment.TopCenter).padding(top = 12.dp)
         )
@@ -43,19 +69,45 @@ fun StoryScreen(imageRes: Int?, progress : Float) {
 }
 
 @Composable
-fun StoryProgressBar(progress: Float, modifier: Modifier = Modifier) {
-    LinearProgressIndicator(
-        progress = progress,
-        modifier = modifier.fillMaxWidth().height(4.dp),
-        color = Color.White,
-        trackColor = Color.Gray.copy(alpha = 0.3f)
-    )
+fun StoryProgressBar(
+    steps: Int,
+    currentStep: Int,
+    progress: Float,
+    modifier: Modifier = Modifier
+)
+{
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(horizontal = 8.dp),
+        horizontalArrangement = Arrangement.spacedBy(4.dp)
+    ) {
+        repeat(steps) { index ->
+            val barProgress = when {
+                index < currentStep -> 1f
+                index == currentStep -> progress
+                else -> 0f
+            }
+
+            LinearProgressIndicator(
+                progress = barProgress,
+                modifier = Modifier
+                    .weight(1f)
+                    .height(4.dp),
+                color = Color.White,
+                trackColor = Color.Gray.copy(alpha = 0.3f)
+            )
+        }
+    }
 }
+
 
 @Preview(showBackground = true)
 @Composable
 fun StoryScreenPreview() {
     AppTheme {
-        StoryScreen(imageRes = null, progress = 0.5f)
+        StoryScreen(
+            imageRes = null
+        )
     }
 }
