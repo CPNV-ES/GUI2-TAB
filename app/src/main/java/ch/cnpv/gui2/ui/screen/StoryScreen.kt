@@ -16,11 +16,16 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.runtime.*
 import kotlinx.coroutines.delay
-import ch.cnpv.gui2.R
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.ui.draw.clip
+import androidx.compose.material3.Text
+
+import ch.cnpv.gui2.R
 
 
 @Composable
@@ -30,7 +35,13 @@ fun StoryScreen(
     currentStep: Int = 0,
     onFinished: () -> Unit = {}
 ) {
-    val painter = if (imageRes != null) {
+    val painterStory = if (imageRes != null) {
+        painterResource(imageRes)
+    } else {
+        painterResource(R.drawable.default_placeholder)
+    }
+
+    val painterAvatar = if (imageRes != null) {
         painterResource(imageRes)
     } else {
         painterResource(R.drawable.default_placeholder)
@@ -60,42 +71,71 @@ fun StoryScreen(
     }
 
     Box(
-        modifier = Modifier.fillMaxSize().pointerInput(Unit) {
-                detectTapGestures(
-                    onPress = { offset ->
-                        val maxWidth = size.width
-                        val pressStartTime = System.currentTimeMillis()
-                        isPressed.value = true
-                        tryAwaitRelease()
-                        val pressEndTime = System.currentTimeMillis()
-                        val totalPressTime = pressEndTime - pressStartTime
+        modifier = Modifier
+            .fillMaxSize()
+            .pointerInput(Unit) {
+            detectTapGestures(
+                onPress = { offset ->
+                    val maxWidth = size.width
+                    val pressStartTime = System.currentTimeMillis()
+                    isPressed.value = true
+                    tryAwaitRelease()
+                    val pressEndTime = System.currentTimeMillis()
+                    val totalPressTime = pressEndTime - pressStartTime
 
-                        if (totalPressTime < 200) {
-                            val isTapOnRightTwoTiers = offset.x > (maxWidth / 4f)
+                    if (totalPressTime < 200) {
+                        val isTapOnRightTwoTiers = offset.x > (maxWidth / 4f)
 
-                            if (isTapOnRightTwoTiers) {
-                                nextScreen()
-                            } else {
-                                previousScreen()
-                            }
+                        if (isTapOnRightTwoTiers) {
+                            nextScreen()
+                        } else {
+                            previousScreen()
                         }
-                        isPressed.value = false
                     }
-                )
-            }
+                    isPressed.value = false
+                }
+            )
+        }
     ) {
         Image(
-            painter = painter,
+            painter = painterStory,
             contentDescription = null,
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier
+                .fillMaxSize(),
             contentScale = ContentScale.Crop
         )
+
+        Row(
+            modifier = Modifier
+                .align(Alignment.TopStart)
+                .padding(top = 60.dp, start = 16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Image(
+                painter = painterAvatar,
+                contentDescription = null,
+                modifier = Modifier
+                    .size(40.dp)
+                    .clip(CircleShape),
+                contentScale = ContentScale.Crop
+            )
+
+            Spacer(modifier = Modifier.width(12.dp))
+
+            Text(
+                text = "Username",
+                style = MaterialTheme.typography.bodyLarge,
+                color = Color.White
+            )
+        }
 
         StoryProgressBar(
             steps = steps,
             currentStep = step,
             progress = progress,
-            modifier = Modifier.align(Alignment.TopCenter).padding(top = 12.dp)
+            modifier = Modifier
+                .align(Alignment.TopCenter)
+                .padding(top = 30.dp)
         )
     }
 }
@@ -122,15 +162,15 @@ fun StoryProgressBar(
             }
 
             LinearProgressIndicator(
-                progress = barProgress,
-                modifier = Modifier.weight(1f).height(4.dp),
+                progress = {barProgress},
+                modifier = Modifier.weight(1f)
+                    .height(4.dp),
                 color = Color.White,
                 trackColor = Color.Gray.copy(alpha = 0.3f)
             )
         }
     }
 }
-
 
 
 
