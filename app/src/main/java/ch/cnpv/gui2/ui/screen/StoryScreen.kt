@@ -22,6 +22,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.ui.draw.clip
 import androidx.compose.material3.Text
 
@@ -69,74 +70,76 @@ fun StoryScreen(
             onFinished()
         }
     }
+    Scaffold() {
+        paddingValues ->
+        Box(
+            modifier = Modifier
+                .fillMaxSize().padding(paddingValues)
+                .pointerInput(Unit) {
+                    detectTapGestures(
+                        onPress = { offset ->
+                            val maxWidth = size.width
+                            val pressStartTime = System.currentTimeMillis()
+                            isPressed.value = true
+                            tryAwaitRelease()
+                            val pressEndTime = System.currentTimeMillis()
+                            val totalPressTime = pressEndTime - pressStartTime
 
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .pointerInput(Unit) {
-            detectTapGestures(
-                onPress = { offset ->
-                    val maxWidth = size.width
-                    val pressStartTime = System.currentTimeMillis()
-                    isPressed.value = true
-                    tryAwaitRelease()
-                    val pressEndTime = System.currentTimeMillis()
-                    val totalPressTime = pressEndTime - pressStartTime
+                            if (totalPressTime < 200) {
+                                val isTapOnRightTwoTiers = offset.x > (maxWidth / 2f)
 
-                    if (totalPressTime < 200) {
-                        val isTapOnRightTwoTiers = offset.x > (maxWidth / 2f)
-
-                        if (isTapOnRightTwoTiers) {
-                            nextScreen()
-                        } else {
-                            previousScreen()
+                                if (isTapOnRightTwoTiers) {
+                                    nextScreen()
+                                } else {
+                                    previousScreen()
+                                }
+                            }
+                            isPressed.value = false
                         }
-                    }
-                    isPressed.value = false
+                    )
                 }
-            )
-        }
-    ) {
-        Image(
-            painter = painterStory,
-            contentDescription = null,
-            modifier = Modifier
-                .fillMaxSize(),
-            contentScale = ContentScale.Crop
-        )
-
-        Row(
-            modifier = Modifier
-                .align(Alignment.TopStart)
-                .padding(top = 60.dp, start = 16.dp),
-            verticalAlignment = Alignment.CenterVertically
         ) {
             Image(
-                painter = painterAvatar,
+                painter = painterStory,
                 contentDescription = null,
                 modifier = Modifier
-                    .size(40.dp)
-                    .clip(CircleShape),
+                    .fillMaxSize(),
                 contentScale = ContentScale.Crop
             )
 
-            Spacer(modifier = Modifier.width(12.dp))
+            Row(
+                modifier = Modifier
+                    .align(Alignment.TopStart)
+                    .padding(top = 25.dp, start = 16.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Image(
+                    painter = painterAvatar,
+                    contentDescription = null,
+                    modifier = Modifier
+                        .size(40.dp)
+                        .clip(CircleShape),
+                    contentScale = ContentScale.Crop
+                )
 
-            Text(
-                text = "Username",
-                style = MaterialTheme.typography.bodyLarge,
-                color = Color.White
+                Spacer(modifier = Modifier.width(12.dp))
+
+                Text(
+                    text = "Username",
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = Color.White
+                )
+            }
+
+            StoryProgressBar(
+                steps = steps,
+                currentStep = step,
+                progress = progress,
+                modifier = Modifier
+                    .align(Alignment.TopCenter)
+                    .padding(top = 10.dp)
             )
         }
-
-        StoryProgressBar(
-            steps = steps,
-            currentStep = step,
-            progress = progress,
-            modifier = Modifier
-                .align(Alignment.TopCenter)
-                .padding(top = 30.dp)
-        )
     }
 }
 
