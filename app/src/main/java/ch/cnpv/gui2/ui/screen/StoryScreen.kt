@@ -166,7 +166,8 @@ fun StoryProgressBar(
                 modifier = Modifier.weight(1f)
                     .height(4.dp),
                 color = Color.White,
-                trackColor = Color.Gray.copy(alpha = 0.3f)
+                trackColor = Color.Gray.copy(alpha = 0.3f),
+                drawStopIndicator = {}
             )
         }
     }
