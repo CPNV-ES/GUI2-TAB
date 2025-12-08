@@ -17,6 +17,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.runtime.*
 import kotlinx.coroutines.delay
 import ch.cnpv.gui2.R
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 
 
 @Composable
@@ -34,6 +38,9 @@ fun StoryScreen(
 
     var step by remember { mutableStateOf(currentStep) }
     var progress by remember { mutableStateOf(0f) }
+    val isPressed = remember { mutableStateOf(false)}
+    val previousScreen = {}
+    val nextScreen = {}
 
     LaunchedEffect(step) {
         progress = 0f
@@ -49,7 +56,29 @@ fun StoryScreen(
     }
 
     Box(
-        modifier = Modifier.fillMaxSize()
+        modifier = Modifier.fillMaxSize().pointerInput(Unit) {
+                detectTapGestures(
+                    onPress = { offset ->
+                        val maxWidth = size.width
+                        val pressStartTime = System.currentTimeMillis()
+                        isPressed.value = true
+                        tryAwaitRelease()
+                        val pressEndTime = System.currentTimeMillis()
+                        val totalPressTime = pressEndTime - pressStartTime
+
+                        if (totalPressTime < 200) {
+                            val isTapOnRightTwoTiers = offset.x > (maxWidth / 4f)
+
+                            if (isTapOnRightTwoTiers) {
+                                nextScreen()
+                            } else {
+                                previousScreen()
+                            }
+                        }
+                        isPressed.value = false
+                    }
+                )
+            }
     ) {
         Image(
             painter = painter,
@@ -64,7 +93,6 @@ fun StoryScreen(
             progress = progress,
             modifier = Modifier.align(Alignment.TopCenter).padding(top = 12.dp)
         )
-
     }
 }
 
@@ -91,15 +119,15 @@ fun StoryProgressBar(
 
             LinearProgressIndicator(
                 progress = barProgress,
-                modifier = Modifier
-                    .weight(1f)
-                    .height(4.dp),
+                modifier = Modifier.weight(1f).height(4.dp),
                 color = Color.White,
                 trackColor = Color.Gray.copy(alpha = 0.3f)
             )
         }
     }
 }
+
+
 
 
 @Preview(showBackground = true)
