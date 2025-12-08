@@ -84,7 +84,7 @@ fun StoryScreen(
                     val totalPressTime = pressEndTime - pressStartTime
 
                     if (totalPressTime < 200) {
-                        val isTapOnRightTwoTiers = offset.x > (maxWidth / 4f)
+                        val isTapOnRightTwoTiers = offset.x > (maxWidth / 2f)
 
                         if (isTapOnRightTwoTiers) {
                             nextScreen()
