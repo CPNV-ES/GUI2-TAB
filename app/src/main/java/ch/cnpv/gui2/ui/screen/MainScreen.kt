@@ -49,6 +49,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.HorizontalAlignmentLine
@@ -168,7 +169,7 @@ fun CarouselStories() {
 fun OutlinedCardPost(items: List<Int>) {
     LazyColumn(
         modifier = Modifier
-            .padding(15.dp)
+            .padding(5.dp)
             .wrapContentSize(Alignment.Center)
             .fillMaxWidth()
     ) {
@@ -203,6 +204,43 @@ fun OutlinedCardPost(items: List<Int>) {
                         verticalArrangement = Arrangement.Center
                     ) {
                         Text(
+                            text = "User $item",
+                            style = MaterialTheme.typography.titleMedium,
+                            modifier = Modifier.padding(bottom = 4.dp)
+                        )
+                        Text(
+                            text = "Location $item",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+                Row(
+                    modifier = Modifier
+                        .height(200.dp)
+                ){
+                    Image(
+                        painter = painterResource(R.drawable.duck2),
+                        contentDescription = "avatar",
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier
+                            .clipToBounds()
+
+                    )
+                }
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ){
+                    Column(
+                        modifier = Modifier
+                            .padding(start = 16.dp)
+                            .weight(1f),
+                        verticalArrangement = Arrangement.Center
+                    ) {
+                        Text(
                             text = "Post $item",
                             style = MaterialTheme.typography.titleMedium,
                             modifier = Modifier.padding(bottom = 4.dp)
@@ -214,6 +252,8 @@ fun OutlinedCardPost(items: List<Int>) {
                         )
                     }
                 }
+
+
             }
         }
     }
