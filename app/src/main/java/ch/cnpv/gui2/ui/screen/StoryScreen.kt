@@ -60,35 +60,39 @@ fun StoryScreen(
 
     LaunchedEffect(step) {
         progress = 0f
-        while (progress < 1f) {
+        while (progress < 1f && !isPressed.value) {
             delay(50)
             progress += 0.01f
         }
-        if (step < steps - 1) {
-            step++
-        } else {
-            onFinished()
+        if (!isPressed.value) {
+            if (step < steps - 1) {
+                step++
+            } else {
+                onFinished()
+            }
         }
     }
-    Scaffold() {
-        paddingValues ->
+    Scaffold() { paddingValues ->
         Box(
             modifier = Modifier
-                .fillMaxSize().padding(paddingValues)
+                .fillMaxSize()
+                .padding(paddingValues)
                 .pointerInput(Unit) {
                     detectTapGestures(
                         onPress = { offset ->
                             val maxWidth = size.width
                             val pressStartTime = System.currentTimeMillis()
                             isPressed.value = true
+
                             tryAwaitRelease()
+
                             val pressEndTime = System.currentTimeMillis()
                             val totalPressTime = pressEndTime - pressStartTime
 
                             if (totalPressTime < 200) {
-                                val isTapOnRightTwoTiers = offset.x > (maxWidth / 2f)
+                                val isTapOnRight = offset.x > (maxWidth / 2f)
 
-                                if (isTapOnRightTwoTiers) {
+                                if (isTapOnRight) {
                                     nextScreen()
                                 } else {
                                     previousScreen()
