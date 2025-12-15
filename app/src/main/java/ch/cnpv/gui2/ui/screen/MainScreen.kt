@@ -60,11 +60,15 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import ch.cnpv.gui2.R
+import ch.cnpv.gui2.data.Data
+import ch.cnpv.gui2.models.Post
 import ch.cnpv.gui2.ui.theme.AppTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MainScreen(onNavigateOtherClick: () -> Unit) {
+fun MainScreen(posts: List<Post>,
+               onPostClick: (Post) -> Unit,
+               onNavigateOtherClick: () -> Unit,) {
     var selectedItem by remember { mutableIntStateOf(0) }
     val items = listOf("Accueil", "Publier", "Recherche")
     val icons = listOf(Icons.Filled.Menu, Icons.Outlined.AddCircle, Icons.Filled.Search)
@@ -260,6 +264,8 @@ fun OutlinedCardPost(items: List<Int>,  onNavigateOtherClick: () -> Unit) {
 @Composable
 fun MainScreenPreview() {
     AppTheme {
-        MainScreen(onNavigateOtherClick = {})
+        MainScreen(posts = Data.posts,
+            onPostClick = {},
+            onNavigateOtherClick = {},)
     }
 }
