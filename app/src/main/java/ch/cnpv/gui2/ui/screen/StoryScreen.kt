@@ -31,17 +31,11 @@ import ch.cnpv.gui2.R
 
 @Composable
 fun StoryScreen(
-    imageRes: Int?,
-    steps: Int = 4,
+    gallery: List<Int>,
+    imageRes : Int?,
     currentStep: Int = 0,
     onFinished: () -> Unit = {}
 ) {
-    val painterStory = if (imageRes != null) {
-        painterResource(imageRes)
-    } else {
-        painterResource(R.drawable.default_placeholder)
-    }
-
     val painterAvatar = if (imageRes != null) {
         painterResource(imageRes)
     } else {
@@ -51,6 +45,8 @@ fun StoryScreen(
     var step by remember { mutableStateOf(currentStep) }
     var progress by remember { mutableStateOf(0f) }
     val isPressed = remember { mutableStateOf(false)}
+    val steps = gallery.size
+
     val previousScreen = {
         if (step > 0) step --
     }
@@ -104,7 +100,7 @@ fun StoryScreen(
                 }
         ) {
             Image(
-                painter = painterStory,
+                painter = painterResource(gallery[step]),
                 contentDescription = "Story",
                 modifier = Modifier
                     .fillMaxSize(),
@@ -187,6 +183,11 @@ fun StoryProgressBar(
 fun StoryScreenPreview() {
     AppTheme {
         StoryScreen(
+            gallery = listOf(
+                R.drawable.duck_placeholder,
+                R.drawable.default_placeholder,
+                R.drawable.duck_placeholder
+            ),
             imageRes = null
         )
     }
