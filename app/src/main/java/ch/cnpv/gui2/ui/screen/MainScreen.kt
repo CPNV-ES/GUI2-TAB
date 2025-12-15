@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyItemScope
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
@@ -117,12 +118,7 @@ fun MainScreen(onNavigateOtherClick: () -> Unit) {
         Column(modifier = Modifier.padding(innerPadding)) {
             CarouselStories()
             Text("MainScreen - Onglet: ${items[selectedItem]}")
-            Button(
-                onClick = { onNavigateOtherClick() },
-            ) {
-                Text("Navigate to other screen")
-            }
-            OutlinedCardPost(itemsCard)
+            OutlinedCardPost(itemsCard, onNavigateOtherClick = onNavigateOtherClick)
         }
     }
 }
@@ -166,7 +162,7 @@ fun CarouselStories() {
 }
 
 @Composable
-fun OutlinedCardPost(items: List<Int>) {
+fun OutlinedCardPost(items: List<Int>,  onNavigateOtherClick: () -> Unit) {
     LazyColumn(
         modifier = Modifier
             .padding(5.dp)
@@ -175,6 +171,7 @@ fun OutlinedCardPost(items: List<Int>) {
     ) {
         items(items) { item ->
             OutlinedCard(
+                onClick = {onNavigateOtherClick()},
                 colors = CardDefaults.cardColors(
                     containerColor = MaterialTheme.colorScheme.surface,
                 ),
