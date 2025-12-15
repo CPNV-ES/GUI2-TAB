@@ -45,7 +45,7 @@ fun StoryScreen(
     val painterAvatar = if (imageRes != null) {
         painterResource(imageRes)
     } else {
-        painterResource(R.drawable.default_placeholder)
+        painterResource(R.drawable.duck_placeholder)
     }
 
     var step by remember { mutableStateOf(currentStep) }
@@ -101,7 +101,7 @@ fun StoryScreen(
         ) {
             Image(
                 painter = painterStory,
-                contentDescription = null,
+                contentDescription = "Story",
                 modifier = Modifier
                     .fillMaxSize(),
                 contentScale = ContentScale.Crop
@@ -115,7 +115,7 @@ fun StoryScreen(
             ) {
                 Image(
                     painter = painterAvatar,
-                    contentDescription = null,
+                    contentDescription = "Avatar",
                     modifier = Modifier
                         .size(40.dp)
                         .clip(CircleShape),
