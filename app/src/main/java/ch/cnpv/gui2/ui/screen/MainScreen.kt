@@ -72,7 +72,6 @@ fun MainScreen(posts: List<Post>,
     var selectedItem by remember { mutableIntStateOf(0) }
     val items = listOf("Accueil", "Publier", "Recherche")
     val icons = listOf(Icons.Filled.Menu, Icons.Outlined.AddCircle, Icons.Filled.Search)
-    val itemsCard = (1..100).toList()
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         topBar = {
@@ -122,7 +121,7 @@ fun MainScreen(posts: List<Post>,
         Column(modifier = Modifier.padding(innerPadding)) {
             CarouselStories()
             Text("MainScreen - Onglet: ${items[selectedItem]}")
-            OutlinedCardPost(itemsCard, onNavigateOtherClick = onNavigateOtherClick)
+            OutlinedCardPost(posts,  onPostClick = { post -> onPostClick(post)})
         }
     }
 }
@@ -166,16 +165,16 @@ fun CarouselStories() {
 }
 
 @Composable
-fun OutlinedCardPost(items: List<Int>,  onNavigateOtherClick: () -> Unit) {
+fun OutlinedCardPost(items: List<Post>,  onPostClick: (Post) -> Unit) {
     LazyColumn(
         modifier = Modifier
             .padding(5.dp)
             .wrapContentSize(Alignment.Center)
             .fillMaxWidth()
     ) {
-        items(items) { item ->
+        items(items) { post ->
             OutlinedCard(
-                onClick = {onNavigateOtherClick()},
+                onClick = { onPostClick(post) },
                 colors = CardDefaults.cardColors(
                     containerColor = MaterialTheme.colorScheme.surface,
                 ),
@@ -191,7 +190,7 @@ fun OutlinedCardPost(items: List<Int>,  onNavigateOtherClick: () -> Unit) {
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Image(
-                        painter = painterResource(R.drawable.profile1),
+                        painter = painterResource(post.image),
                         contentDescription = "avatar",
                         contentScale = ContentScale.Crop,
                         modifier = Modifier
@@ -205,12 +204,12 @@ fun OutlinedCardPost(items: List<Int>,  onNavigateOtherClick: () -> Unit) {
                         verticalArrangement = Arrangement.Center
                     ) {
                         Text(
-                            text = "User $item",
+                            text = post.profil.username,
                             style = MaterialTheme.typography.titleMedium,
                             modifier = Modifier.padding(bottom = 4.dp)
                         )
                         Text(
-                            text = "Location $item",
+                            text = post.topic,
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -221,7 +220,7 @@ fun OutlinedCardPost(items: List<Int>,  onNavigateOtherClick: () -> Unit) {
                         .height(200.dp)
                 ){
                     Image(
-                        painter = painterResource(R.drawable.duck2),
+                        painter = painterResource(post.profil.image),
                         contentDescription = "avatar",
                         contentScale = ContentScale.Crop,
                         modifier = Modifier
@@ -242,19 +241,17 @@ fun OutlinedCardPost(items: List<Int>,  onNavigateOtherClick: () -> Unit) {
                         verticalArrangement = Arrangement.Center
                     ) {
                         Text(
-                            text = "Post $item",
+                            text = post.topic,
                             style = MaterialTheme.typography.titleMedium,
                             modifier = Modifier.padding(bottom = 4.dp)
                         )
                         Text(
-                            text = "Description $item",
+                            text = post.description,
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
                 }
-
-
             }
         }
     }
