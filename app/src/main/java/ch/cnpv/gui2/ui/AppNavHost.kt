@@ -6,7 +6,6 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import ch.cnpv.gui2.data.Data
 import ch.cnpv.gui2.ui.screen.MainScreen
-import ch.cnpv.gui2.ui.screen.OtherScreen
 import ch.cnpv.gui2.ui.screen.DetailScreen
 import kotlinx.serialization.Serializable
 
@@ -30,9 +29,6 @@ fun AppNavHost() {
                 onPostClick = { post ->
                     navController.navigate(Detail(post.id))
                 },
-                onNavigateOtherClick = {
-                    navController.navigate(Other)
-                }
             )
         }
 
@@ -44,12 +40,6 @@ fun AppNavHost() {
 
             DetailScreen(
                 post = post,
-                onBackClick = { navController.navigateUp() }
-            )
-        }
-
-        composable<Other> {
-            OtherScreen(
                 onBackClick = { navController.navigateUp() }
             )
         }

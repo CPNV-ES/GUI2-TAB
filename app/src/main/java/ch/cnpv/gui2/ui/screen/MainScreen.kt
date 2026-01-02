@@ -67,8 +67,7 @@ import ch.cnpv.gui2.ui.theme.AppTheme
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainScreen(posts: List<Post>,
-               onPostClick: (Post) -> Unit,
-               onNavigateOtherClick: () -> Unit,) {
+               onPostClick: (Post) -> Unit, ) {
     var selectedItem by remember { mutableIntStateOf(0) }
     val items = listOf("Accueil", "Publier", "Recherche")
     val icons = listOf(Icons.Filled.Menu, Icons.Outlined.AddCircle, Icons.Filled.Search)
@@ -120,7 +119,6 @@ fun MainScreen(posts: List<Post>,
     ) { innerPadding ->
         Column(modifier = Modifier.padding(innerPadding)) {
             CarouselStories()
-            Text("MainScreen - Onglet: ${items[selectedItem]}")
             OutlinedCardPost(posts,  onPostClick = { post -> onPostClick(post)})
         }
     }
@@ -262,7 +260,6 @@ fun OutlinedCardPost(items: List<Post>,  onPostClick: (Post) -> Unit) {
 fun MainScreenPreview() {
     AppTheme {
         MainScreen(posts = Data.posts,
-            onPostClick = {},
-            onNavigateOtherClick = {},)
+            onPostClick = {},)
     }
 }
