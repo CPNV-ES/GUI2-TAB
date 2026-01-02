@@ -7,6 +7,7 @@ import androidx.navigation.compose.rememberNavController
 import ch.cnpv.gui2.data.Data
 import ch.cnpv.gui2.ui.screen.MainScreen
 import ch.cnpv.gui2.ui.screen.DetailScreen
+import ch.cnpv.gui2.ui.screen.StoryScreen
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -17,6 +18,9 @@ object Other
 
 @Serializable
 data class Detail(val postId: Int)
+
+@Serializable
+data class Story(val postId: Int)
 
 @Composable
 fun AppNavHost() {
@@ -29,6 +33,9 @@ fun AppNavHost() {
                 onPostClick = { post ->
                     navController.navigate(Detail(post.id))
                 },
+                onStoryClick = { post ->
+                    navController.navigate(Story(post.id))
+                }
             )
         }
 
@@ -41,6 +48,16 @@ fun AppNavHost() {
             DetailScreen(
                 post = post,
                 onBackClick = { navController.navigateUp() }
+            )
+        }
+
+        composable<Story> { backStackEntry ->
+            val postId = backStackEntry.arguments?.getInt("postId") ?: return@composable
+            val post = Data.posts.first { it.id == postId }
+
+            StoryScreen(
+                post = post,
+                onFinished = { navController.navigateUp() }
             )
         }
     }

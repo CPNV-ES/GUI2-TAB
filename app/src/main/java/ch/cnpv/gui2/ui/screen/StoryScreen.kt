@@ -25,33 +25,30 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.ui.draw.clip
 import androidx.compose.material3.Text
-
 import ch.cnpv.gui2.R
+import ch.cnpv.gui2.data.Data
+import ch.cnpv.gui2.models.Post
 
 
 @Composable
 fun StoryScreen(
-    gallery: List<Int>,
-    imageRes : Int?,
+    post: Post,
     currentStep: Int = 0,
     onFinished: () -> Unit = {}
 ) {
-    val painterAvatar = if (imageRes != null) {
-        painterResource(imageRes)
-    } else {
-        painterResource(R.drawable.duck_placeholder)
-    }
+    val gallery = listOf(post.image)
+    val avatar = post.profil.image
 
     var step by remember { mutableStateOf(currentStep) }
     var progress by remember { mutableStateOf(0f) }
-    val isPressed = remember { mutableStateOf(false)}
+    val isPressed = remember { mutableStateOf(false) }
     val steps = gallery.size
 
     val previousScreen = {
-        if (step > 0) step --
+        if (step > 0) step--
     }
     val nextScreen = {
-        if (step < steps -1) step ++
+        if (step < steps - 1) step++
     }
 
     LaunchedEffect(step) {
@@ -61,14 +58,12 @@ fun StoryScreen(
             progress += 0.01f
         }
         if (!isPressed.value) {
-            if (step < steps - 1) {
-                step++
-            } else {
-                onFinished()
-            }
+            if (step < steps - 1) step++
+            else onFinished()
         }
     }
-    Scaffold() { paddingValues ->
+
+    Scaffold { paddingValues ->
         Box(
             modifier = Modifier
                 .fillMaxSize()
@@ -77,22 +72,17 @@ fun StoryScreen(
                     detectTapGestures(
                         onPress = { offset ->
                             val maxWidth = size.width
-                            val pressStartTime = System.currentTimeMillis()
+                            val pressStart = System.currentTimeMillis()
                             isPressed.value = true
 
                             tryAwaitRelease()
 
-                            val pressEndTime = System.currentTimeMillis()
-                            val totalPressTime = pressEndTime - pressStartTime
+                            val pressEnd = System.currentTimeMillis()
+                            val duration = pressEnd - pressStart
 
-                            if (totalPressTime < 200) {
-                                val isTapOnRight = offset.x > (maxWidth / 2f)
-
-                                if (isTapOnRight) {
-                                    nextScreen()
-                                } else {
-                                    previousScreen()
-                                }
+                            if (duration < 200) {
+                                if (offset.x > maxWidth / 2f) nextScreen()
+                                else previousScreen()
                             }
                             isPressed.value = false
                         }
@@ -102,8 +92,7 @@ fun StoryScreen(
             Image(
                 painter = painterResource(gallery[step]),
                 contentDescription = "Story",
-                modifier = Modifier
-                    .fillMaxSize(),
+                modifier = Modifier.fillMaxSize(),
                 contentScale = ContentScale.Crop
             )
 
@@ -114,7 +103,7 @@ fun StoryScreen(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Image(
-                    painter = painterAvatar,
+                    painter = painterResource(avatar),
                     contentDescription = "Avatar",
                     modifier = Modifier
                         .size(40.dp)
@@ -125,9 +114,9 @@ fun StoryScreen(
                 Spacer(modifier = Modifier.width(12.dp))
 
                 Text(
-                    text = "Username",
+                    text = post.profil.username,
                     style = MaterialTheme.typography.bodyLarge,
-                    color = Color.White
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
 
@@ -176,19 +165,12 @@ fun StoryProgressBar(
     }
 }
 
-
-
 @Preview(showBackground = true)
 @Composable
 fun StoryScreenPreview() {
     AppTheme {
         StoryScreen(
-            gallery = listOf(
-                R.drawable.duck_placeholder,
-                R.drawable.default_placeholder,
-                R.drawable.duck_placeholder
-            ),
-            imageRes = null
+            post = Data.posts.last()
         )
     }
 }

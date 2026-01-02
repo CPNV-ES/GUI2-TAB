@@ -6,6 +6,7 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -67,7 +68,8 @@ import ch.cnpv.gui2.ui.theme.AppTheme
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainScreen(posts: List<Post>,
-               onPostClick: (Post) -> Unit, ) {
+               onPostClick: (Post) -> Unit,
+               onStoryClick: (Post) -> Unit){
     var selectedItem by remember { mutableIntStateOf(0) }
     val items = listOf("Accueil", "Publier", "Recherche")
     val icons = listOf(Icons.Filled.Menu, Icons.Outlined.AddCircle, Icons.Filled.Search)
@@ -118,32 +120,20 @@ fun MainScreen(posts: List<Post>,
         }
     ) { innerPadding ->
         Column(modifier = Modifier.padding(innerPadding)) {
-            CarouselStories()
+            CarouselStories { post -> onStoryClick(post) }
             OutlinedCardPost(posts,  onPostClick = { post -> onPostClick(post)})
         }
     }
 }
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CarouselStories() {
-    data class CarouselItem(
-        val id: Int,
-        @DrawableRes val imageResId: Int,
-        val contentDescription: String
-    )
-
-    val carouselItems = remember {
-        listOf(
-            CarouselItem(0, R.drawable.profile1, "cupcake"),
-            CarouselItem(1, R.drawable.profile2, "donut"),
-            CarouselItem(2, R.drawable.profile1, "eclair"),
-            CarouselItem(3, R.drawable.profile2, "froyo"),
-            CarouselItem(4, R.drawable.profile1, "gingerbread"),
-        )
-    }
+fun CarouselStories(
+    onStoryClick:  (Post) -> Unit
+) {
+    val posts = Data.posts   // ← on utilise tes vrais posts
 
     HorizontalUncontainedCarousel(
-        state = rememberCarouselState { carouselItems.count() },
+        state = rememberCarouselState { posts.size },
         modifier = Modifier
             .fillMaxWidth()
             .wrapContentHeight()
@@ -151,13 +141,19 @@ fun CarouselStories() {
         itemWidth = 100.dp,
         itemSpacing = 8.dp,
     ) { i ->
-        val item = carouselItems[i]
+
+        val post = posts[i]
+
         Image(
             modifier = Modifier
-                .height(100.dp),
-            painter = painterResource(id = item.imageResId),
-            contentDescription = item.contentDescription,
-            contentScale = ContentScale.Fit
+                .height(100.dp)
+                .clip(CircleShape)
+                .clickable {
+                    onStoryClick(post)   // ← on envoie le Post entier
+                },
+            painter = painterResource(id = post.profil.image),
+            contentDescription = post.profil.username,
+            contentScale = ContentScale.Crop
         )
     }
 }
@@ -259,7 +255,10 @@ fun OutlinedCardPost(items: List<Post>,  onPostClick: (Post) -> Unit) {
 @Composable
 fun MainScreenPreview() {
     AppTheme {
-        MainScreen(posts = Data.posts,
-            onPostClick = {},)
+        MainScreen(
+            posts = Data.posts,
+            onPostClick = {},
+            onStoryClick = {}
+        )
     }
 }
