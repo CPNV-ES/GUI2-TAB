@@ -1,13 +1,10 @@
 package ch.cnpv.gui2.ui.screen
 
-import android.R.id.primary
-import androidx.annotation.DrawableRes
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -18,19 +15,17 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyItemScope
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
-import androidx.compose.material.icons.filled.AddCircle
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.outlined.AddCircle
-import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -54,25 +49,26 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.layout.HorizontalAlignmentLine
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import ch.cnpv.gui2.R
-import ch.cnpv.gui2.data.Data
 import ch.cnpv.gui2.models.Post
 import ch.cnpv.gui2.ui.theme.AppTheme
+import coil3.compose.AsyncImage
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MainScreen(posts: List<Post>,
-               onPostClick: (Post) -> Unit,
-               onStoryClick: (Post) -> Unit){
+fun MainScreen(
+    posts: List<Post>,
+    isLoading: Boolean = false,
+    onPostClick: (Post) -> Unit,
+    onStoryClick: (Post) -> Unit
+) {
     var selectedItem by remember { mutableIntStateOf(0) }
     val items = listOf("Accueil", "Publier", "Recherche")
     val icons = listOf(Icons.Filled.Menu, Icons.Outlined.AddCircle, Icons.Filled.Search)
+
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         topBar = {
@@ -120,17 +116,28 @@ fun MainScreen(posts: List<Post>,
         }
     ) { innerPadding ->
         Column(modifier = Modifier.padding(innerPadding)) {
-            CarouselStories { post -> onStoryClick(post) }
-            OutlinedCardPost(posts,  onPostClick = { post -> onPostClick(post)})
+            if (isLoading) {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator()
+                }
+            } else {
+                CarouselStories(posts = posts) { post -> onStoryClick(post) }
+                OutlinedCardPost(posts, onPostClick = { post -> onPostClick(post) })
+            }
         }
     }
 }
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CarouselStories(
-    onStoryClick:  (Post) -> Unit
+    posts: List<Post>,
+    onStoryClick: (Post) -> Unit
 ) {
-    val posts = Data.posts   // ← on utilise tes vrais posts
+    if (posts.isEmpty()) return
 
     HorizontalUncontainedCarousel(
         state = rememberCarouselState { posts.size },
@@ -141,25 +148,22 @@ fun CarouselStories(
         itemWidth = 100.dp,
         itemSpacing = 8.dp,
     ) { i ->
-
         val post = posts[i]
 
         Image(
             modifier = Modifier
                 .height(100.dp)
                 .clip(CircleShape)
-                .clickable {
-                    onStoryClick(post)   // ← on envoie le Post entier
-                },
-            painter = painterResource(id = post.profil.image),
-            contentDescription = post.profil.username,
+                .clickable { onStoryClick(post) },
+            painter = painterResource(id = R.drawable.duck_placeholder),
+            contentDescription = post.description,
             contentScale = ContentScale.Crop
         )
     }
 }
 
 @Composable
-fun OutlinedCardPost(items: List<Post>,  onPostClick: (Post) -> Unit) {
+fun OutlinedCardPost(items: List<Post>, onPostClick: (Post) -> Unit) {
     LazyColumn(
         modifier = Modifier
             .padding(5.dp)
@@ -184,7 +188,7 @@ fun OutlinedCardPost(items: List<Post>,  onPostClick: (Post) -> Unit) {
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Image(
-                        painter = painterResource(post.image),
+                        painter = painterResource(R.drawable.default_placeholder),
                         contentDescription = "avatar",
                         contentScale = ContentScale.Crop,
                         modifier = Modifier
@@ -198,47 +202,41 @@ fun OutlinedCardPost(items: List<Post>,  onPostClick: (Post) -> Unit) {
                         verticalArrangement = Arrangement.Center
                     ) {
                         Text(
-                            text = post.profil.username,
+                            text = "Profil ${post.id.take(8)}",
                             style = MaterialTheme.typography.titleMedium,
                             modifier = Modifier.padding(bottom = 4.dp)
                         )
                         Text(
-                            text = post.topic,
-                            style = MaterialTheme.typography.bodyMedium,
+                            text = post.createdAt,
+                            style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
                 }
-                Row(
-                    modifier = Modifier
-                        .height(200.dp)
-                ){
-                    Image(
-                        painter = painterResource(post.profil.image),
-                        contentDescription = "avatar",
-                        contentScale = ContentScale.Crop,
-                        modifier = Modifier
-                            .clipToBounds()
 
+                Row(
+                    modifier = Modifier.height(200.dp)
+                ) {
+                    Image(
+                        painter = painterResource(R.drawable.duck_placeholder),
+                        contentDescription = post.description,
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier.clipToBounds()
                     )
                 }
+
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(16.dp),
                     verticalAlignment = Alignment.CenterVertically
-                ){
+                ) {
                     Column(
                         modifier = Modifier
                             .padding(start = 16.dp)
                             .weight(1f),
                         verticalArrangement = Arrangement.Center
                     ) {
-                        Text(
-                            text = post.topic,
-                            style = MaterialTheme.typography.titleMedium,
-                            modifier = Modifier.padding(bottom = 4.dp)
-                        )
                         Text(
                             text = post.description,
                             style = MaterialTheme.typography.bodyMedium,
@@ -248,17 +246,5 @@ fun OutlinedCardPost(items: List<Post>,  onPostClick: (Post) -> Unit) {
                 }
             }
         }
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun MainScreenPreview() {
-    AppTheme {
-        MainScreen(
-            posts = Data.posts,
-            onPostClick = {},
-            onStoryClick = {}
-        )
     }
 }

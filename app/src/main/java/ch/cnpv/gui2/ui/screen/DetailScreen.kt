@@ -1,6 +1,5 @@
 package ch.cnpv.gui2.ui.screen
 
-import android.graphics.pdf.models.ListItem
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -19,28 +18,41 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import ch.cnpv.gui2.ui.theme.AppTheme
 import ch.cnpv.gui2.R
-import ch.cnpv.gui2.data.Data
+import ch.cnpv.gui2.models.Comment
 import ch.cnpv.gui2.models.Post
-
+import ch.cnpv.gui2.network.RetrofitInstance
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DetailScreen(
     post: Post,
-    onBackClick: () -> Unit) {
+    onBackClick: () -> Unit
+) {
     val sheetState = rememberModalBottomSheetState()
     val scope = rememberCoroutineScope()
     var showBottomSheet by remember { mutableStateOf(false) }
+    var comments by remember { mutableStateOf<List<Comment>>(emptyList()) }
+    var isLoadingComments by remember { mutableStateOf(false) }
+
+    LaunchedEffect(showBottomSheet) {
+        if (showBottomSheet && comments.isEmpty()) {
+            isLoadingComments = true
+            try {
+                comments = RetrofitInstance.api.getComments(post.id)
+            } catch (e: Exception) {
+            }
+            isLoadingComments = false
+        }
+    }
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -66,12 +78,9 @@ fun DetailScreen(
                 },
                 actions = {
                     IconButton(onClick = { /* do something */ }) {
-                        Image(
-                            painter = painterResource(post.image),
-                            contentDescription = "Exemple d'image",
-                            contentScale = ContentScale.Crop,
-                            modifier = Modifier
-                                .fillMaxWidth()
+                        Icon(
+                            imageVector = Icons.Default.AccountCircle,
+                            contentDescription = "Profile"
                         )
                     }
                 }
@@ -85,39 +94,40 @@ fun DetailScreen(
                 shape = RectangleShape,
             ) {
                 Column(
-                    modifier = Modifier.padding(20.dp)
+                    modifier = Modifier
+                        .padding(20.dp)
                         .fillMaxSize()
                 ) {
-                    Row(
-
-                    ) {
-                        IconButton(
-                            onClick = { /* do something */ }) {
-                            Image(
-                                painter = painterResource(post.image),
-                                contentDescription = "Exemple d'image",
-                                contentScale = ContentScale.Crop,
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                            )
-                        }
+                    Row {
+                        Image(
+                            painter = painterResource(R.drawable.default_placeholder),
+                            contentDescription = "avatar",
+                            contentScale = ContentScale.Crop,
+                            modifier = Modifier
+                                .size(40.dp)
+                                .clip(CircleShape)
+                        )
                         Column(
                             modifier = Modifier.padding(start = 10.dp)
                         ) {
-                            Text(text = post.topic,
-                                fontWeight = FontWeight.Bold)
-                            Text(text = post.profil.username)
+                            Text(
+                                text = "Profil ${post.id.take(8)}",
+                                fontWeight = FontWeight.Bold
+                            )
+                            Text(text = post.createdAt.take(10))
                         }
                     }
-                    Text(text = post.description,
+
+                    Text(
+                        text = post.description,
                         fontSize = MaterialTheme.typography.bodyLarge.fontSize,
                         color = Color.Gray,
                         fontWeight = FontWeight.Medium,
                         modifier = Modifier.padding(8.dp)
                     )
                     Image(
-                        painter = painterResource(id = R.drawable.salut),
-                        contentDescription = "Exemple d'image",
+                        painter = painterResource(id = R.drawable.duck_placeholder),
+                        contentDescription = post.description,
                         contentScale = ContentScale.Crop,
                         modifier = Modifier
                             .fillMaxWidth()
@@ -127,7 +137,7 @@ fun DetailScreen(
                     )
                 }
             }
-                  },
+        },
         bottomBar = {
             BottomAppBar(
                 containerColor = Color.White
@@ -156,7 +166,6 @@ fun DetailScreen(
                     }
                 }
             }
-
         }
     )
 
@@ -171,18 +180,23 @@ fun DetailScreen(
                     .padding(16.dp)
             ) {
                 Text(
-                    text = "Commentaires (${post.comments.size})",
+                    text = "Commentaires (${comments.size})",
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold
                 )
 
-                if (post.comments.isEmpty()) {
+                if (isLoadingComments) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.padding(16.dp)
+                    )
+                } else if (comments.isEmpty()) {
                     Text(
-                        text = "Aucun commentaire pour l’instant",
-                        color = MaterialTheme.colorScheme.outline
+                        text = "Aucun commentaire pour l'instant",
+                        color = MaterialTheme.colorScheme.outline,
+                        modifier = Modifier.padding(vertical = 16.dp)
                     )
                 } else {
-                    post.comments.forEach { comment ->
+                    comments.forEach { comment ->
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -195,7 +209,7 @@ fun DetailScreen(
                             )
                             Column(modifier = Modifier.padding(start = 8.dp)) {
                                 Text(
-                                    text = comment.profil.username,
+                                    text = "User ${comment.fromId.take(8)}",
                                     fontWeight = FontWeight.Bold
                                 )
                                 Text(text = comment.text)
@@ -205,16 +219,5 @@ fun DetailScreen(
                 }
             }
         }
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun DetailScreenPreview() {
-    AppTheme {
-        DetailScreen(
-            post = Data.posts.first(),
-            onBackClick = {}
-        )
     }
 }

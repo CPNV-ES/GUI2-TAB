@@ -3,8 +3,6 @@ package ch.cnpv.gui2.ui.screen
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
-import ch.cnpv.gui2.ui.theme.AppTheme
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.LinearProgressIndicator
@@ -26,9 +24,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.ui.draw.clip
 import androidx.compose.material3.Text
 import ch.cnpv.gui2.R
-import ch.cnpv.gui2.data.Data
 import ch.cnpv.gui2.models.Post
-
 
 @Composable
 fun StoryScreen(
@@ -36,8 +32,7 @@ fun StoryScreen(
     currentStep: Int = 0,
     onFinished: () -> Unit = {}
 ) {
-    val gallery = listOf(post.image)
-    val avatar = post.profil.image
+    val gallery = listOf(R.drawable.duck_placeholder)
 
     var step by remember { mutableStateOf(currentStep) }
     var progress by remember { mutableStateOf(0f) }
@@ -103,7 +98,7 @@ fun StoryScreen(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Image(
-                    painter = painterResource(avatar),
+                    painter = painterResource(R.drawable.default_placeholder),
                     contentDescription = "Avatar",
                     modifier = Modifier
                         .size(40.dp)
@@ -114,9 +109,9 @@ fun StoryScreen(
                 Spacer(modifier = Modifier.width(12.dp))
 
                 Text(
-                    text = post.profil.username,
+                    text = "Profil ${post.id.take(8)}",
                     style = MaterialTheme.typography.bodyLarge,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    color = Color.White
                 )
             }
 
@@ -138,8 +133,7 @@ fun StoryProgressBar(
     currentStep: Int,
     progress: Float,
     modifier: Modifier = Modifier
-)
-{
+) {
     Row(
         modifier = modifier
             .fillMaxWidth()
@@ -154,23 +148,14 @@ fun StoryProgressBar(
             }
 
             LinearProgressIndicator(
-                progress = {barProgress},
-                modifier = Modifier.weight(1f)
+                progress = { barProgress },
+                modifier = Modifier
+                    .weight(1f)
                     .height(4.dp),
                 color = Color.White,
                 trackColor = Color.Gray.copy(alpha = 0.3f),
                 drawStopIndicator = {}
             )
         }
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun StoryScreenPreview() {
-    AppTheme {
-        StoryScreen(
-            post = Data.posts.last()
-        )
     }
 }
