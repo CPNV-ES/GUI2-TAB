@@ -5,8 +5,9 @@ import com.google.gson.annotations.SerializedName
 data class Profil(
     val id: String,
     val name: String,
-    @SerializedName("image_id")
-    val imageId: Int,
+    @SerializedName("image_url")
+    val imageUrl: String,
+    val hash: String? = null,
     @SerializedName("created_at")
     val createdAt: String,
     @SerializedName("updated_at")
