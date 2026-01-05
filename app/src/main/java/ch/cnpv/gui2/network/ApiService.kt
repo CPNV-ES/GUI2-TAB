@@ -28,6 +28,12 @@ interface ApiService {
         @Path("post_id") postId: String
     ): Post
 
+    @DELETE("profils/{id}/posts/{post_id}")
+    suspend fun deletePost(
+        @Path("id") profilId: String,
+        @Path("post_id") postId: String
+    )
+
     // Comments
     @GET("posts/{id}/comments")
     suspend fun getComments(@Path("id") id: String): List<Comment>

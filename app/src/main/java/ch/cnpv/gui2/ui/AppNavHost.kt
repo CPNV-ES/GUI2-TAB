@@ -13,6 +13,7 @@ import ch.cnpv.gui2.models.Post
 import ch.cnpv.gui2.network.RetrofitInstance
 import ch.cnpv.gui2.ui.screen.MainScreen
 import ch.cnpv.gui2.ui.screen.DetailScreen
+import ch.cnpv.gui2.ui.screen.MyPostsScreen
 import ch.cnpv.gui2.ui.screen.StoryScreen
 import kotlinx.serialization.Serializable
 
@@ -25,51 +26,65 @@ data class Detail(val postId: String)
 @Serializable
 data class Story(val postId: String)
 
+@Serializable
+object MyPosts
+
 @Composable
 fun AppNavHost() {
     val navController = rememberNavController()
-    var posts by remember { mutableStateOf<List<Post>>(emptyList()) }
+    var feedPosts by remember { mutableStateOf<List<Post>>(emptyList()) }
+    var myPosts by remember { mutableStateOf<List<Post>>(emptyList()) }
     var isLoading by remember { mutableStateOf(true) }
 
     LaunchedEffect(Unit) {
         try {
             val aliceId = "11111111-1111-1111-1111-111111111111"
 
-            val friends = RetrofitInstance.api.getFriends(aliceId)
+            myPosts = RetrofitInstance.api.getPosts(aliceId)
 
-            val allPosts = mutableListOf<Post>()
-            friends.forEach { friend ->
+            val friends = RetrofitInstance.api.getFriends(aliceId)
+            val friendsPosts = friends.flatMap { friend ->
                 try {
-                    val friendPosts = RetrofitInstance.api.getPosts(friend.id)
-                    allPosts.addAll(friendPosts)
+                    RetrofitInstance.api.getPosts(friend.id)
                 } catch (e: Exception) {
+                    emptyList()
                 }
             }
 
-            posts = allPosts
-            isLoading = false
+            feedPosts = friendsPosts
+
         } catch (e: Exception) {
+            feedPosts = emptyList()
+            myPosts = emptyList()
+        } finally {
             isLoading = false
         }
     }
 
+
+
     NavHost(navController, startDestination = Main) {
         composable<Main> {
             MainScreen(
-                posts = posts,
+                posts = feedPosts,
                 isLoading = isLoading,
                 onPostClick = { post ->
                     navController.navigate(Detail(post.id))
                 },
                 onStoryClick = { post ->
                     navController.navigate(Story(post.id))
-                }
+                },
+                onMyPostsClick = {
+                    navController.navigate(MyPosts)
+                },
             )
         }
 
         composable<Detail> { backStackEntry ->
             val detail = backStackEntry.arguments?.getString("postId") ?: return@composable
-            val post = posts.firstOrNull { it.id == detail }
+            val allPosts = feedPosts + myPosts
+
+            val post = allPosts.firstOrNull { it.id == detail }
 
             if (post != null) {
                 DetailScreen(
@@ -81,7 +96,7 @@ fun AppNavHost() {
 
         composable<Story> { backStackEntry ->
             val storyId = backStackEntry.arguments?.getString("postId") ?: return@composable
-            val post = posts.firstOrNull { it.id == storyId }
+            val post = feedPosts.firstOrNull { it.id == storyId }
 
             if (post != null) {
                 StoryScreen(
@@ -89,6 +104,19 @@ fun AppNavHost() {
                     onFinished = { navController.navigateUp() }
                 )
             }
+        }
+
+        composable<MyPosts> {
+            MyPostsScreen(
+                posts = myPosts,
+                onBackClick = { navController.navigateUp() },
+                onPostClick = { post ->
+                    navController.navigate(Detail(post.id))
+                },
+                onDelete = { deletedPost ->
+                    myPosts = myPosts.filter { it.id != deletedPost.id }
+                }
+            )
         }
     }
 }

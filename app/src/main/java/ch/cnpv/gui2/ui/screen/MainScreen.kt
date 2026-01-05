@@ -18,6 +18,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.outlined.AddCircle
@@ -59,11 +60,12 @@ fun MainScreen(
     posts: List<Post>,
     isLoading: Boolean = false,
     onPostClick: (Post) -> Unit,
-    onStoryClick: (Post) -> Unit
+    onStoryClick: (Post) -> Unit,
+    onMyPostsClick: () -> Unit,
 ) {
     var selectedItem by remember { mutableIntStateOf(0) }
-    val items = listOf("Accueil", "Publier", "Recherche")
-    val icons = listOf(Icons.Filled.Menu, Icons.Outlined.AddCircle, Icons.Filled.Search)
+    val items = listOf("Accueil", "Publier", "Mes edits")
+    val icons = listOf(Icons.Filled.Menu, Icons.Outlined.AddCircle, Icons.Filled.Edit)
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -105,7 +107,13 @@ fun MainScreen(
                         icon = { Icon(icons[index], contentDescription = item) },
                         label = { Text(item) },
                         selected = selectedItem == index,
-                        onClick = { selectedItem = index }
+                        onClick = {
+                            selectedItem = index
+
+                            when (index) {
+                                2 -> onMyPostsClick()
+                            }
+                        }
                     )
                 }
             }
@@ -159,7 +167,11 @@ fun CarouselStories(
 }
 
 @Composable
-fun OutlinedCardPost(items: List<Post>, onPostClick: (Post) -> Unit) {
+fun OutlinedCardPost(
+    items: List<Post>,
+    onPostClick: (Post) -> Unit,
+    actions: @Composable (Post) -> Unit = {},
+) {
     LazyColumn(
         modifier = Modifier
             .padding(5.dp)
@@ -240,6 +252,14 @@ fun OutlinedCardPost(items: List<Post>, onPostClick: (Post) -> Unit) {
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
+                }
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 8.dp),
+                    horizontalArrangement = Arrangement.End
+                ) {
+                    actions(post)
                 }
             }
         }
