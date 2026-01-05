@@ -1,7 +1,6 @@
 package ch.cnpv.gui2.ui.screen
 
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -46,16 +45,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import ch.cnpv.gui2.R
 import ch.cnpv.gui2.models.Post
-import ch.cnpv.gui2.ui.theme.AppTheme
-import coil3.compose.AsyncImage
+import ch.cnpv.gui2.ui.components.ProfileImage
+import ch.cnpv.gui2.ui.components.PostImage
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -150,14 +146,14 @@ fun CarouselStories(
     ) { i ->
         val post = posts[i]
 
-        Image(
+        ProfileImage(
+            imageUrl = post.profil.imageUrl,
+            contentDescription = "Story de ${post.profil.name}",
+            contentScale = ContentScale.Crop,
             modifier = Modifier
-                .height(100.dp)
+                .size(100.dp)
                 .clip(CircleShape)
-                .clickable { onStoryClick(post) },
-            painter = painterResource(id = R.drawable.duck_placeholder),
-            contentDescription = post.description,
-            contentScale = ContentScale.Crop
+                .clickable { onStoryClick(post) }
         )
     }
 }
@@ -187,14 +183,15 @@ fun OutlinedCardPost(items: List<Post>, onPostClick: (Post) -> Unit) {
                         .padding(16.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Image(
-                        painter = painterResource(R.drawable.default_placeholder),
-                        contentDescription = "avatar",
+                    ProfileImage(
+                        imageUrl = post.profil.imageUrl,
+                        contentDescription = "Avatar de ${post.profil.name}",
                         contentScale = ContentScale.Crop,
                         modifier = Modifier
                             .size(64.dp)
                             .clip(CircleShape)
                     )
+
                     Column(
                         modifier = Modifier
                             .padding(start = 16.dp)
@@ -202,12 +199,12 @@ fun OutlinedCardPost(items: List<Post>, onPostClick: (Post) -> Unit) {
                         verticalArrangement = Arrangement.Center
                     ) {
                         Text(
-                            text = "Profil ${post.id.take(8)}",
+                            text = post.profil.name,
                             style = MaterialTheme.typography.titleMedium,
                             modifier = Modifier.padding(bottom = 4.dp)
                         )
                         Text(
-                            text = post.createdAt,
+                            text = post.createdAt.take(10),
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -217,11 +214,11 @@ fun OutlinedCardPost(items: List<Post>, onPostClick: (Post) -> Unit) {
                 Row(
                     modifier = Modifier.height(200.dp)
                 ) {
-                    Image(
-                        painter = painterResource(R.drawable.duck_placeholder),
+                    PostImage(
+                        imageUrl = post.imageUrl,
                         contentDescription = post.description,
                         contentScale = ContentScale.Crop,
-                        modifier = Modifier.clipToBounds()
+                        modifier = Modifier.fillMaxWidth()
                     )
                 }
 

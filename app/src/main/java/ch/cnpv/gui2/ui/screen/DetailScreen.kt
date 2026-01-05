@@ -1,6 +1,5 @@
 package ch.cnpv.gui2.ui.screen
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -22,13 +21,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import ch.cnpv.gui2.ui.theme.AppTheme
-import ch.cnpv.gui2.R
 import ch.cnpv.gui2.models.Comment
 import ch.cnpv.gui2.models.Post
 import ch.cnpv.gui2.network.RetrofitInstance
+import ch.cnpv.gui2.ui.components.ProfileImage
+import ch.cnpv.gui2.ui.components.PostImage
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -99,9 +97,9 @@ fun DetailScreen(
                         .fillMaxSize()
                 ) {
                     Row {
-                        Image(
-                            painter = painterResource(R.drawable.default_placeholder),
-                            contentDescription = "avatar",
+                        ProfileImage(
+                            imageUrl = post.profil.imageUrl,
+                            contentDescription = "Avatar de ${post.profil.name}",
                             contentScale = ContentScale.Crop,
                             modifier = Modifier
                                 .size(40.dp)
@@ -111,7 +109,7 @@ fun DetailScreen(
                             modifier = Modifier.padding(start = 10.dp)
                         ) {
                             Text(
-                                text = "Profil ${post.id.take(8)}",
+                                text = post.profil.name,
                                 fontWeight = FontWeight.Bold
                             )
                             Text(text = post.createdAt.take(10))
@@ -125,8 +123,9 @@ fun DetailScreen(
                         fontWeight = FontWeight.Medium,
                         modifier = Modifier.padding(8.dp)
                     )
-                    Image(
-                        painter = painterResource(id = R.drawable.duck_placeholder),
+
+                    PostImage(
+                        imageUrl = post.imageUrl,
                         contentDescription = post.description,
                         contentScale = ContentScale.Crop,
                         modifier = Modifier

@@ -3,10 +3,8 @@ package ch.cnpv.gui2.ui.screen
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.LinearProgressIndicator
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.foundation.layout.*
 import androidx.compose.ui.Alignment
@@ -23,8 +21,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.ui.draw.clip
 import androidx.compose.material3.Text
-import ch.cnpv.gui2.R
 import ch.cnpv.gui2.models.Post
+import ch.cnpv.gui2.ui.components.PostImage
+import ch.cnpv.gui2.ui.components.ProfileImage
 
 @Composable
 fun StoryScreen(
@@ -32,12 +31,12 @@ fun StoryScreen(
     currentStep: Int = 0,
     onFinished: () -> Unit = {}
 ) {
-    val gallery = listOf(R.drawable.duck_placeholder)
+    val storyImages = listOf(post.imageUrl)
 
     var step by remember { mutableStateOf(currentStep) }
     var progress by remember { mutableStateOf(0f) }
     val isPressed = remember { mutableStateOf(false) }
-    val steps = gallery.size
+    val steps = storyImages.size
 
     val previousScreen = {
         if (step > 0) step--
@@ -84,9 +83,10 @@ fun StoryScreen(
                     )
                 }
         ) {
-            Image(
-                painter = painterResource(gallery[step]),
-                contentDescription = "Story",
+
+            PostImage(
+                imageUrl = storyImages[step],
+                contentDescription = "Story de ${post.profil.name}",
                 modifier = Modifier.fillMaxSize(),
                 contentScale = ContentScale.Crop
             )
@@ -97,9 +97,9 @@ fun StoryScreen(
                     .padding(top = 25.dp, start = 16.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Image(
-                    painter = painterResource(R.drawable.default_placeholder),
-                    contentDescription = "Avatar",
+                ProfileImage(
+                    imageUrl = post.profil.imageUrl,
+                    contentDescription = "Avatar de ${post.profil.name}",
                     modifier = Modifier
                         .size(40.dp)
                         .clip(CircleShape),
@@ -109,7 +109,7 @@ fun StoryScreen(
                 Spacer(modifier = Modifier.width(12.dp))
 
                 Text(
-                    text = "Profil ${post.id.take(8)}",
+                    text = post.profil.name,
                     style = MaterialTheme.typography.bodyLarge,
                     color = Color.White
                 )
