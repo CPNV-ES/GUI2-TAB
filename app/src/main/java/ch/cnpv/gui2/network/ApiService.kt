@@ -37,4 +37,7 @@ interface ApiService {
     // Comments
     @GET("posts/{id}/comments")
     suspend fun getComments(@Path("id") id: String): List<Comment>
+
+    @POST("profils/{id}/posts")
+    suspend fun postPost(@Path("id") id: String): Post
 }
