@@ -6,8 +6,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Menu
-import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.outlined.AddCircle
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.CircularProgressIndicator
@@ -28,36 +28,28 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import ch.cnpv.gui2.ui.theme.AppTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.filled.Send
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.ui.graphics.Color
 import androidx.compose.material3.TextField
-
 import ch.cnpv.gui2.models.Post
-
-import java.util.UUID
-import java.time.Instant
-
-import com.google.gson.annotations.SerializedName
+import ch.cnpv.gui2.models.Profil
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PublishScreen(
     isLoading: Boolean = false,
-    onSend: (Post) -> Unit = {}
+    onSend: (Post) -> Unit = {},
+    onBackClick: () -> Unit = {}
 ) {
-    var selectedItem by remember { mutableIntStateOf(0) }
-    val items = listOf("Accueil", "Publier", "Recherche")
+    var selectedItem by remember { mutableIntStateOf(1) }
+    val items = listOf("Accueil", "Publier", "Mes edits")
     val icons = listOf(
         Icons.Filled.Menu,
         Icons.Outlined.AddCircle,
-        Icons.Filled.Search
+        Icons.Filled.Edit
     )
 
     Scaffold(
@@ -70,12 +62,12 @@ fun PublishScreen(
                 ),
                 title = { Text("Duck Duck Social") },
                 actions = {
-                    IconButton(onClick = { }) {
+                    IconButton(onClick = { /* do something */ }) {
                         Icon(Icons.Default.AccountCircle, contentDescription = "Profil")
                     }
                 },
                 navigationIcon = {
-                    IconButton(onClick = { }) {
+                    IconButton(onClick = { /* do something */ }) {
                         Icon(Icons.Filled.Menu, contentDescription = "Menu")
                     }
                 },
@@ -88,7 +80,13 @@ fun PublishScreen(
                         icon = { Icon(icons[index], contentDescription = item) },
                         label = { Text(item) },
                         selected = selectedItem == index,
-                        onClick = { selectedItem = index }
+                        onClick = {
+                            selectedItem = index
+
+                            when (index) {
+                                0 -> onBackClick()
+                            }
+                        }
                     )
                 }
             }
@@ -120,7 +118,7 @@ fun PublishForm(
     modifier: Modifier = Modifier
 ) {
     var text by remember { mutableStateOf("") }
-    var imageId by remember { mutableStateOf<Int?>(null) }
+    var imageUrl by remember { mutableStateOf<String?>(null) }
 
     Column(
         modifier = modifier.padding(16.dp),
@@ -137,28 +135,42 @@ fun PublishForm(
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        Button(onClick = { imageId = (1..100).random() }) {
-            Text(if (imageId == null) "Ajouter une image" else "Image sélectionnée : $imageId")
+        Button(onClick = {
+            val randomImageId = (1..100).random()
+            imageUrl = "https://picsum.photos/seed/$randomImageId/400/300"
+        }) {
+            Text(if (imageUrl == null) "Ajouter une image" else "Image sélectionnée")
         }
 
         Spacer(modifier = Modifier.height(8.dp))
 
         Button(
             onClick = {
-                if (text.isNotBlank() && imageId != null) {
+                if (text.isNotBlank() && imageUrl != null) {
+                    val currentTime = java.time.Instant.now().toString()
+                    val aliceProfil = Profil(
+                        id = "11111111-1111-1111-1111-111111111111",
+                        name = "Alice",
+                        imageUrl = "https://i.pravatar.cc/150?img=1",
+                        hash = null,
+                        createdAt = currentTime,
+                        updatedAt = currentTime
+                    )
+
                     val newPost = Post(
                         id = java.util.UUID.randomUUID().toString(),
                         description = text,
-                        imageId = imageId!!,
-                        createdAt = java.time.Instant.now().toString(),
-                        updatedAt = java.time.Instant.now().toString()
+                        imageUrl = imageUrl!!,
+                        profil = aliceProfil,
+                        createdAt = currentTime,
+                        updatedAt = currentTime
                     )
                     onSend(newPost)
                     text = ""
-                    imageId = null
+                    imageUrl = null
                 }
             },
-            enabled = text.isNotBlank() && imageId != null
+            enabled = text.isNotBlank() && imageUrl != null
         ) {
             Text("Publier")
         }

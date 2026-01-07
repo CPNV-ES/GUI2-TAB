@@ -81,7 +81,6 @@ fun AppNavHost() {
                 onMyPostsClick = {
                     navController.navigate(MyPosts)
                 },
-                },
                 onPublishClick = {
                     navController.navigate(Publish)
                 }
@@ -126,10 +125,16 @@ fun AppNavHost() {
                 }
             )
         }
+
         composable<Publish> {
             PublishScreen(
                 isLoading = false,
-                onSend = { println(it) }
+                onSend = { post ->
+                    println(post)
+                },
+                onBackClick = {
+                    navController.navigateUp()
+                }
             )
         }
     }
