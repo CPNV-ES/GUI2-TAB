@@ -59,33 +59,10 @@ fun ProfilScreen(
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         topBar = {
-            CenterAlignedTopAppBar(
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                    titleContentColor = MaterialTheme.colorScheme.primary,
-                ),
-                title = {
-                    Text(
-                        "Duck Duck Social",
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                },
-                actions = {
-                    ch.cnpv.gui2.ui.components.ProfileSwitcher(
-                        currentProfil = currentProfil,
-                        availableProfils = availableProfils,
-                        onProfilSelected = onProfilSelected
-                    )
-                },
-                navigationIcon = {
-                    IconButton(onClick = { /* do something */ }) {
-                        Icon(
-                            imageVector = Icons.Filled.Menu,
-                            contentDescription = "Menu"
-                        )
-                    }
-                },
+            ch.cnpv.gui2.ui.components.AppTopBar(
+                currentProfil = currentProfil,
+                availableProfils = availableProfils,
+                onProfilSelected = onProfilSelected
             )
         },
         bottomBar = {

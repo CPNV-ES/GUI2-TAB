@@ -125,6 +125,11 @@ fun AppNavHost() {
             if (post != null) {
                 DetailScreen(
                     post = post,
+                    currentProfil = currentProfil,
+                    availableProfils = availableProfils,
+                    onProfilSelected = { profil ->
+                        currentProfil = profil
+                    },
                     onBackClick = { navController.navigateUp() }
                 )
             } else {

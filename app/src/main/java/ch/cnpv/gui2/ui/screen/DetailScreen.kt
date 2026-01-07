@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -24,19 +23,22 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import ch.cnpv.gui2.models.Comment
 import ch.cnpv.gui2.models.Post
+import ch.cnpv.gui2.models.Profil
 import ch.cnpv.gui2.network.RetrofitInstance
 import ch.cnpv.gui2.ui.components.ProfileImage
 import ch.cnpv.gui2.ui.components.PostImage
-import kotlinx.coroutines.launch
+import ch.cnpv.gui2.ui.components.AppTopBar
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DetailScreen(
     post: Post,
+    currentProfil: Profil?,
+    availableProfils: List<Profil>,
+    onProfilSelected: (Profil) -> Unit,
     onBackClick: () -> Unit
 ) {
     val sheetState = rememberModalBottomSheetState()
-    val scope = rememberCoroutineScope()
     var showBottomSheet by remember { mutableStateOf(false) }
     var comments by remember { mutableStateOf<List<Comment>>(emptyList()) }
     var isLoadingComments by remember { mutableStateOf(false) }
@@ -55,32 +57,14 @@ fun DetailScreen(
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         topBar = {
-            CenterAlignedTopAppBar(
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                    titleContentColor = MaterialTheme.colorScheme.primary,
-                ),
-                title = { Text("DucDuc social") },
-                navigationIcon = {
-                    IconButton(
-                        onClick = {
-                            if (showBottomSheet) {
-                                showBottomSheet = false
-                            } else {
-                                onBackClick()
-                            }
-                        }
-                    ) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Back")
-                    }
-                },
-                actions = {
-                    IconButton(onClick = { /* do something */ }) {
-                        Icon(
-                            imageVector = Icons.Default.AccountCircle,
-                            contentDescription = "Profile"
-                        )
-                    }
+            AppTopBar(
+                currentProfil = currentProfil,
+                availableProfils = availableProfils,
+                onProfilSelected = onProfilSelected,
+                onBackClick = if (showBottomSheet) {
+                    { showBottomSheet = false }
+                } else {
+                    onBackClick
                 }
             )
         },

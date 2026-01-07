@@ -52,31 +52,10 @@ fun PostFormScreen(
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         topBar = {
-            CenterAlignedTopAppBar(
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                    titleContentColor = MaterialTheme.colorScheme.primary,
-                ),
-                title = {
-                    Text(
-                        when (mode) {
-                            is PostFormMode.Create -> "Créer une publication"
-                            is PostFormMode.Edit -> "Modifier la publication"
-                        }
-                    )
-                },
-                actions = {
-                    ch.cnpv.gui2.ui.components.ProfileSwitcher(
-                        currentProfil = currentProfil,
-                        availableProfils = availableProfils,
-                        onProfilSelected = onProfilSelected
-                    )
-                },
-                navigationIcon = {
-                    IconButton(onClick = { onNavigateHome() }) {
-                        Icon(Icons.Filled.ArrowBack, contentDescription = "Retour")
-                    }
-                },
+            ch.cnpv.gui2.ui.components.AppTopBar(
+                currentProfil = currentProfil,
+                availableProfils = availableProfils,
+                onProfilSelected = onProfilSelected
             )
         },
         bottomBar = {
