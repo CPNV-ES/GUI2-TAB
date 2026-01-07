@@ -17,25 +17,37 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import ch.cnpv.gui2.models.Post
-import ch.cnpv.gui2.ui.viewmodel.PublishViewModel
+import ch.cnpv.gui2.models.Profil
+import ch.cnpv.gui2.ui.components.PostImage
+import ch.cnpv.gui2.ui.viewmodel.PostFormViewModel
 import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
 import coil3.request.crossfade
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun PublishScreen(
-    currentProfil: ch.cnpv.gui2.models.Profil?,
-    availableProfils: List<ch.cnpv.gui2.models.Profil>,
-    onProfilSelected: (ch.cnpv.gui2.models.Profil) -> Unit,
+fun PostFormScreen(
+    mode: PostFormMode,
+    currentProfil: Profil?,
+    availableProfils: List<Profil>,
+    onProfilSelected: (Profil) -> Unit,
     onSuccess: (Post) -> Unit = {},
     onNavigateHome: () -> Unit = {},
     onNavigateProfil: () -> Unit = {},
-    viewModel: PublishViewModel = viewModel()
+    viewModel: PostFormViewModel = viewModel()
 ) {
-    var selectedItem by remember { mutableIntStateOf(1) }
+    val selectedItem = when (mode) {
+        is PostFormMode.Create -> 1
+        is PostFormMode.Edit -> 2
+    }
     val items = listOf("Accueil", "Publier", "Profil")
     val icons = listOf(Icons.Filled.Home, Icons.Outlined.AddCircle, Icons.Filled.AccountCircle)
+
+    LaunchedEffect(mode) {
+        if (mode is PostFormMode.Edit) {
+            viewModel.setEditMode(mode.post)
+        }
+    }
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -45,7 +57,14 @@ fun PublishScreen(
                     containerColor = MaterialTheme.colorScheme.primaryContainer,
                     titleContentColor = MaterialTheme.colorScheme.primary,
                 ),
-                title = { Text("Duck Duck Social") },
+                title = {
+                    Text(
+                        when (mode) {
+                            is PostFormMode.Create -> "Créer une publication"
+                            is PostFormMode.Edit -> "Modifier la publication"
+                        }
+                    )
+                },
                 actions = {
                     ch.cnpv.gui2.ui.components.ProfileSwitcher(
                         currentProfil = currentProfil,
@@ -54,8 +73,8 @@ fun PublishScreen(
                     )
                 },
                 navigationIcon = {
-                    IconButton(onClick = { }) {
-                        Icon(Icons.Filled.Menu, contentDescription = "Menu")
+                    IconButton(onClick = { onNavigateHome() }) {
+                        Icon(Icons.Filled.ArrowBack, contentDescription = "Retour")
                     }
                 },
             )
@@ -68,7 +87,6 @@ fun PublishScreen(
                         label = { Text(item) },
                         selected = selectedItem == index,
                         onClick = {
-                            selectedItem = index
                             when (index) {
                                 0 -> onNavigateHome()
                                 2 -> onNavigateProfil()
@@ -79,9 +97,10 @@ fun PublishScreen(
             }
         }
     ) { innerPadding ->
-        PublishForm(
+        PostForm(
             viewModel = viewModel,
             currentProfil = currentProfil,
+            mode = mode,
             onSuccess = onSuccess,
             onBackClick = onNavigateHome,
             modifier = Modifier
@@ -92,9 +111,10 @@ fun PublishScreen(
 }
 
 @Composable
-fun PublishForm(
-    viewModel: PublishViewModel,
-    currentProfil: ch.cnpv.gui2.models.Profil?,
+fun PostForm(
+    viewModel: PostFormViewModel,
+    currentProfil: Profil?,
+    mode: PostFormMode,
     onSuccess: (Post) -> Unit,
     onBackClick: () -> Unit,
     modifier: Modifier = Modifier
@@ -102,18 +122,22 @@ fun PublishForm(
     val context = LocalContext.current
     val uiState by viewModel.uiState.collectAsState()
 
-    var description by remember { mutableStateOf("") }
+    var description by remember { mutableStateOf(
+        if (mode is PostFormMode.Edit) mode.post.description else ""
+    ) }
     var imageUri by remember { mutableStateOf<Uri?>(null) }
+    var hasImageChanged by remember { mutableStateOf(false) }
 
     val imagePickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
     ) { uri: Uri? ->
         imageUri = uri
+        hasImageChanged = true
     }
 
-    LaunchedEffect(uiState.publishedPost) {
-        if (uiState.publishedPost != null) {
-            onSuccess(uiState.publishedPost!!)
+    LaunchedEffect(uiState.savedPost) {
+        if (uiState.savedPost != null) {
+            onSuccess(uiState.savedPost!!)
             description = ""
             imageUri = null
             viewModel.resetState()
@@ -127,7 +151,10 @@ fun PublishForm(
         verticalArrangement = Arrangement.Center
     ) {
         Text(
-            text = "Créer une publication",
+            text = when (mode) {
+                is PostFormMode.Create -> "Créer une publication"
+                is PostFormMode.Edit -> "Modifier la publication"
+            },
             style = MaterialTheme.typography.headlineSmall,
             modifier = Modifier.padding(bottom = 16.dp)
         )
@@ -145,22 +172,31 @@ fun PublishForm(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        if (imageUri != null) {
+        if (imageUri != null || (mode is PostFormMode.Edit && !hasImageChanged)) {
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(200.dp),
                 shape = RoundedCornerShape(12.dp)
             ) {
-                AsyncImage(
-                    model = ImageRequest.Builder(context)
-                        .data(imageUri)
-                        .crossfade(true)
-                        .build(),
-                    contentDescription = "Image sélectionnée",
-                    modifier = Modifier.fillMaxSize(),
-                    contentScale = ContentScale.Crop
-                )
+                if (imageUri != null) {
+                    AsyncImage(
+                        model = ImageRequest.Builder(context)
+                            .data(imageUri)
+                            .crossfade(true)
+                            .build(),
+                        contentDescription = "Image sélectionnée",
+                        modifier = Modifier.fillMaxSize(),
+                        contentScale = ContentScale.Crop
+                    )
+                } else if (mode is PostFormMode.Edit) {
+                    PostImage(
+                        imageUrl = mode.post.imageUrl,
+                        contentDescription = "Image actuelle",
+                        modifier = Modifier.fillMaxSize(),
+                        contentScale = ContentScale.Crop
+                    )
+                }
             }
             Spacer(modifier = Modifier.height(16.dp))
         }
@@ -175,7 +211,13 @@ fun PublishForm(
                 contentDescription = null,
                 modifier = Modifier.padding(end = 8.dp)
             )
-            Text(if (imageUri == null) "Ajouter une image" else "Changer l'image")
+            Text(
+                when {
+                    imageUri != null -> "Changer l'image"
+                    mode is PostFormMode.Edit && !hasImageChanged -> "Changer l'image"
+                    else -> "Ajouter une image"
+                }
+            )
         }
 
         Spacer(modifier = Modifier.height(8.dp))
@@ -193,17 +235,35 @@ fun PublishForm(
 
         Button(
             onClick = {
-                if (imageUri != null && currentProfil != null) {
-                    viewModel.publishPost(
-                        context = context,
-                        description = description,
-                        imageUri = imageUri!!,
-                        profilId = currentProfil.id
-                    )
+                when (mode) {
+                    is PostFormMode.Create -> {
+                        if (imageUri != null && currentProfil != null) {
+                            viewModel.createPost(
+                                context = context,
+                                description = description,
+                                imageUri = imageUri!!,
+                                profilId = currentProfil.id
+                            )
+                        }
+                    }
+                    is PostFormMode.Edit -> {
+                        if (currentProfil != null) {
+                            viewModel.updatePost(
+                                context = context,
+                                postId = mode.post.id,
+                                description = description,
+                                imageUri = imageUri,
+                                profilId = currentProfil.id
+                            )
+                        }
+                    }
                 }
             },
             modifier = Modifier.fillMaxWidth(),
-            enabled = description.isNotBlank() && imageUri != null && !uiState.isLoading && currentProfil != null
+            enabled = when (mode) {
+                is PostFormMode.Create -> description.isNotBlank() && imageUri != null && !uiState.isLoading && currentProfil != null
+                is PostFormMode.Edit -> description.isNotBlank() && !uiState.isLoading && currentProfil != null
+            }
         ) {
             if (uiState.isLoading) {
                 CircularProgressIndicator(
@@ -213,7 +273,23 @@ fun PublishForm(
                     color = MaterialTheme.colorScheme.onPrimary
                 )
             }
-            Text(if (uiState.isLoading) "Publication en cours..." else "Publier")
+            Text(
+                when {
+                    uiState.isLoading -> when (mode) {
+                        is PostFormMode.Create -> "Publication en cours..."
+                        is PostFormMode.Edit -> "Modification en cours..."
+                    }
+                    else -> when (mode) {
+                        is PostFormMode.Create -> "Publier"
+                        is PostFormMode.Edit -> "Modifier"
+                    }
+                }
+            )
         }
     }
+}
+
+sealed class PostFormMode {
+    object Create : PostFormMode()
+    data class Edit(val post: Post) : PostFormMode()
 }

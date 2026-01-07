@@ -22,7 +22,8 @@ import ch.cnpv.gui2.network.RetrofitInstance
 import ch.cnpv.gui2.ui.screen.MainScreen
 import ch.cnpv.gui2.ui.screen.DetailScreen
 import ch.cnpv.gui2.ui.screen.ProfilScreen
-import ch.cnpv.gui2.ui.screen.PublishScreen
+import ch.cnpv.gui2.ui.screen.PostFormScreen
+import ch.cnpv.gui2.ui.screen.PostFormMode
 import ch.cnpv.gui2.ui.screen.StoryScreen
 import kotlinx.serialization.Serializable
 
@@ -30,7 +31,10 @@ import kotlinx.serialization.Serializable
 object Main
 
 @Serializable
-object Publish
+object CreatePost
+
+@Serializable
+data class EditPost(val postId: String)
 
 @Serializable
 data class Detail(val postId: String)
@@ -108,7 +112,7 @@ fun AppNavHost() {
                     navController.navigate(ProfilScreen)
                 },
                 onPublishClick = {
-                    navController.navigate(Publish)
+                    navController.navigate(CreatePost)
                 }
             )
         }
@@ -160,10 +164,13 @@ fun AppNavHost() {
                     }
                 },
                 onNavigatePublish = {
-                    navController.navigate(Publish)
+                    navController.navigate(CreatePost)
                 },
                 onPostClick = { post ->
                     navController.navigate(Detail(post.id))
+                },
+                onEdit = { post ->
+                    navController.navigate(EditPost(post.id))
                 },
                 onDelete = { deletedPost ->
                     myPosts = myPosts.filter { it.id != deletedPost.id }
@@ -171,8 +178,9 @@ fun AppNavHost() {
             )
         }
 
-        composable<Publish> {
-            PublishScreen(
+        composable<CreatePost> {
+            PostFormScreen(
+                mode = PostFormMode.Create,
                 currentProfil = currentProfil,
                 availableProfils = availableProfils,
                 onProfilSelected = { profil ->
@@ -190,6 +198,39 @@ fun AppNavHost() {
                     navController.navigate(ProfilScreen)
                 }
             )
+        }
+
+        composable<EditPost> { backStackEntry ->
+            val postId = backStackEntry.arguments?.getString("postId") ?: return@composable
+            val post = myPosts.firstOrNull { it.id == postId }
+
+            if (post != null) {
+                PostFormScreen(
+                    mode = PostFormMode.Edit(post),
+                    currentProfil = currentProfil,
+                    availableProfils = availableProfils,
+                    onProfilSelected = { profil ->
+                        currentProfil = profil
+                    },
+                    onSuccess = { updatedPost ->
+                        myPosts = myPosts.map {
+                            if (it.id == updatedPost.id) updatedPost else it
+                        }
+                    },
+                    onNavigateHome = {
+                        navController.navigate(ProfilScreen) {
+                            popUpTo(ProfilScreen) { inclusive = false }
+                        }
+                    },
+                    onNavigateProfil = {
+                        navController.navigate(ProfilScreen)
+                    }
+                )
+            } else {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    Text("Post non trouvé")
+                }
+            }
         }
     }
 }

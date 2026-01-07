@@ -17,18 +17,23 @@ import okhttp3.RequestBody.Companion.toRequestBody
 import java.io.File
 import java.io.FileOutputStream
 
-data class PublishUiState(
+data class PostFormUiState(
     val isLoading: Boolean = false,
     val errorMessage: String? = null,
-    val publishedPost: Post? = null
+    val savedPost: Post? = null,
+    val editingPost: Post? = null
 )
 
-class PublishViewModel : ViewModel() {
+class PostFormViewModel : ViewModel() {
 
-    private val _uiState = MutableStateFlow(PublishUiState())
-    val uiState: StateFlow<PublishUiState> = _uiState.asStateFlow()
+    private val _uiState = MutableStateFlow(PostFormUiState())
+    val uiState: StateFlow<PostFormUiState> = _uiState.asStateFlow()
 
-    fun publishPost(
+    fun setEditMode(post: Post) {
+        _uiState.value = PostFormUiState(editingPost = post)
+    }
+
+    fun createPost(
         context: Context,
         description: String,
         imageUri: Uri,
@@ -36,7 +41,7 @@ class PublishViewModel : ViewModel() {
     ) {
         viewModelScope.launch {
             try {
-                _uiState.value = PublishUiState(isLoading = true)
+                _uiState.value = PostFormUiState(isLoading = true)
 
                 val tempFile = uriToTempFile(context, imageUri)
                 val imagePart = createImagePart(tempFile)
@@ -50,13 +55,13 @@ class PublishViewModel : ViewModel() {
 
                 tempFile.delete()
 
-                _uiState.value = PublishUiState(
+                _uiState.value = PostFormUiState(
                     isLoading = false,
-                    publishedPost = newPost
+                    savedPost = newPost
                 )
 
             } catch (e: Exception) {
-                _uiState.value = PublishUiState(
+                _uiState.value = PostFormUiState(
                     isLoading = false,
                     errorMessage = "Erreur lors de la publication : ${e.message}"
                 )
@@ -65,8 +70,57 @@ class PublishViewModel : ViewModel() {
         }
     }
 
+    fun updatePost(
+        context: Context,
+        postId: String,
+        description: String,
+        imageUri: Uri?,
+        profilId: String
+    ) {
+        viewModelScope.launch {
+            try {
+                _uiState.value = PostFormUiState(isLoading = true)
+
+                val descriptionPart = description.toRequestBody("text/plain".toMediaTypeOrNull())
+
+                val updatedPost = if (imageUri != null) {
+                    val tempFile = uriToTempFile(context, imageUri)
+                    val imagePart = createImagePart(tempFile)
+
+                    val post = RetrofitInstance.api.updatePostWithImage(
+                        profilId = profilId,
+                        postId = postId,
+                        description = descriptionPart,
+                        image = imagePart
+                    )
+
+                    tempFile.delete()
+                    post
+                } else {
+                    RetrofitInstance.api.updatePost(
+                        profilId = profilId,
+                        postId = postId,
+                        description = descriptionPart
+                    )
+                }
+
+                _uiState.value = PostFormUiState(
+                    isLoading = false,
+                    savedPost = updatedPost
+                )
+
+            } catch (e: Exception) {
+                _uiState.value = PostFormUiState(
+                    isLoading = false,
+                    errorMessage = "Erreur lors de la modification : ${e.message}"
+                )
+                e.printStackTrace()
+            }
+        }
+    }
+
     fun resetState() {
-        _uiState.value = PublishUiState()
+        _uiState.value = PostFormUiState()
     }
 
     private fun uriToTempFile(context: Context, imageUri: Uri): File {

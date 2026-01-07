@@ -46,4 +46,20 @@ interface ApiService {
         @Part("description") description: RequestBody,
         @Part image: MultipartBody.Part
     ): Post
+
+    @Multipart
+    @PUT("profils/{id}/posts/{post_id}")
+    suspend fun updatePostWithImage(
+        @Path("id") profilId: String,
+        @Path("post_id") postId: String,
+        @Part("description") description: RequestBody,
+        @Part image: MultipartBody.Part
+    ): Post
+
+    @PUT("profils/{id}/posts/{post_id}")
+    suspend fun updatePost(
+        @Path("id") profilId: String,
+        @Path("post_id") postId: String,
+        @Body description: RequestBody
+    ): Post
 }

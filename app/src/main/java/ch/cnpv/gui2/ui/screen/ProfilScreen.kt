@@ -47,6 +47,7 @@ fun ProfilScreen(
     onProfilSelected: (ch.cnpv.gui2.models.Profil) -> Unit,
     onNavigateHome: () -> Unit,
     onNavigatePublish: () -> Unit,
+    onEdit: (Post) -> Unit,
     onDelete: (Post) -> Unit,
     onPostClick: (Post) -> Unit,
 ) {
@@ -111,7 +112,7 @@ fun ProfilScreen(
                 posts,
                 onPostClick = { post -> onPostClick(post) },
                 actions = { post ->
-                    IconButton(onClick = { /* todo link edit screen */  }) {
+                    IconButton(onClick = { onEdit(post) }) {
                         Icon(Icons.Filled.Edit, contentDescription = "Modifier")
                     }
                     IconButton(
