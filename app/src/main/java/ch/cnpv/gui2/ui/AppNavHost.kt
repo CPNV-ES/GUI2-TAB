@@ -128,9 +128,8 @@ fun AppNavHost() {
 
         composable<Publish> {
             PublishScreen(
-                isLoading = false,
-                onSend = { post ->
-                    println(post)
+                onSuccess = { newPost ->
+                    myPosts = listOf(newPost) + myPosts
                 },
                 onBackClick = {
                     navController.navigateUp()

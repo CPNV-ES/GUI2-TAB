@@ -3,6 +3,8 @@ package ch.cnpv.gui2.network
 import ch.cnpv.gui2.models.Comment
 import ch.cnpv.gui2.models.Post
 import ch.cnpv.gui2.models.Profil
+import okhttp3.MultipartBody
+import okhttp3.RequestBody
 import retrofit2.http.*
 
 interface ApiService {
@@ -34,10 +36,16 @@ interface ApiService {
         @Path("post_id") postId: String
     )
 
+    // Create a post with image (multipart)
+    @Multipart
+    @POST("profils/{id}/posts")
+    suspend fun createPostWithImage(
+        @Path("id") profilId: String,
+        @Part("description") description: RequestBody,
+        @Part image: MultipartBody.Part
+    ): Post
+
     // Comments
     @GET("posts/{id}/comments")
     suspend fun getComments(@Path("id") id: String): List<Comment>
-
-    @POST("profils/{id}/posts")
-    suspend fun postPost(@Path("id") id: String): Post
 }
