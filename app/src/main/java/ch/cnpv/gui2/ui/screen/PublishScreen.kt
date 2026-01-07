@@ -26,12 +26,13 @@ import coil3.request.crossfade
 @Composable
 fun PublishScreen(
     onSuccess: (Post) -> Unit = {},
-    onBackClick: () -> Unit = {},
+    onNavigateHome: () -> Unit = {},
+    onNavigateProfil: () -> Unit = {},
     viewModel: PublishViewModel = viewModel()
 ) {
     var selectedItem by remember { mutableIntStateOf(1) }
-    val items = listOf("Accueil", "Publier", "Mes edits")
-    val icons = listOf(Icons.Filled.Menu, Icons.Outlined.AddCircle, Icons.Filled.Edit)
+    val items = listOf("Accueil", "Publier", "Profil")
+    val icons = listOf(Icons.Filled.Home, Icons.Outlined.AddCircle, Icons.Filled.AccountCircle)
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -43,7 +44,7 @@ fun PublishScreen(
                 ),
                 title = { Text("Duck Duck Social") },
                 actions = {
-                    IconButton(onClick = { }) {
+                    IconButton(onClick = { onNavigateProfil() }) {
                         Icon(Icons.Default.AccountCircle, contentDescription = "Profil")
                     }
                 },
@@ -64,7 +65,8 @@ fun PublishScreen(
                         onClick = {
                             selectedItem = index
                             when (index) {
-                                0 -> onBackClick()
+                                0 -> onNavigateHome()
+                                2 -> onNavigateProfil()
                             }
                         }
                     )
@@ -75,7 +77,7 @@ fun PublishScreen(
         PublishForm(
             viewModel = viewModel,
             onSuccess = onSuccess,
-            onBackClick = onBackClick,
+            onBackClick = onNavigateHome,
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)

@@ -13,7 +13,7 @@ import ch.cnpv.gui2.models.Post
 import ch.cnpv.gui2.network.RetrofitInstance
 import ch.cnpv.gui2.ui.screen.MainScreen
 import ch.cnpv.gui2.ui.screen.DetailScreen
-import ch.cnpv.gui2.ui.screen.MyPostsScreen
+import ch.cnpv.gui2.ui.screen.ProfilScreen
 import ch.cnpv.gui2.ui.screen.PublishScreen
 import ch.cnpv.gui2.ui.screen.StoryScreen
 import kotlinx.serialization.Serializable
@@ -31,7 +31,7 @@ data class Detail(val postId: String)
 data class Story(val postId: String)
 
 @Serializable
-object MyPosts
+object Profil
 
 @Composable
 fun AppNavHost() {
@@ -78,8 +78,8 @@ fun AppNavHost() {
                 onStoryClick = { post ->
                     navController.navigate(Story(post.id))
                 },
-                onMyPostsClick = {
-                    navController.navigate(MyPosts)
+                onProfilClick = {
+                    navController.navigate(Profil)
                 },
                 onPublishClick = {
                     navController.navigate(Publish)
@@ -113,10 +113,17 @@ fun AppNavHost() {
             }
         }
 
-        composable<MyPosts> {
-            MyPostsScreen(
+        composable<Profil> {
+            ProfilScreen(
                 posts = myPosts,
-                onBackClick = { navController.navigateUp() },
+                onNavigateHome = {
+                    navController.navigate(Main) {
+                        popUpTo(Main) { inclusive = false }
+                    }
+                },
+                onNavigatePublish = {
+                    navController.navigate(Publish)
+                },
                 onPostClick = { post ->
                     navController.navigate(Detail(post.id))
                 },
@@ -131,8 +138,13 @@ fun AppNavHost() {
                 onSuccess = { newPost ->
                     myPosts = listOf(newPost) + myPosts
                 },
-                onBackClick = {
-                    navController.navigateUp()
+                onNavigateHome = {
+                    navController.navigate(Main) {
+                        popUpTo(Main) { inclusive = false }
+                    }
+                },
+                onNavigateProfil = {
+                    navController.navigate(Profil)
                 }
             )
         }

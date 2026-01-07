@@ -19,6 +19,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.outlined.AddCircle
@@ -61,12 +62,12 @@ fun MainScreen(
     isLoading: Boolean = false,
     onPostClick: (Post) -> Unit,
     onStoryClick: (Post) -> Unit,
-    onMyPostsClick: () -> Unit,
+    onProfilClick: () -> Unit,
     onPublishClick: () -> Unit
 ) {
     var selectedItem by remember { mutableIntStateOf(0) }
-    val items = listOf("Accueil", "Publier", "Mes edits")
-    val icons = listOf(Icons.Filled.Menu, Icons.Outlined.AddCircle, Icons.Filled.Edit)
+    val items = listOf("Accueil", "Publier", "Profil")
+    val icons = listOf(Icons.Filled.Home, Icons.Outlined.AddCircle, Icons.Filled.AccountCircle)
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -84,7 +85,7 @@ fun MainScreen(
                     )
                 },
                 actions = {
-                    IconButton(onClick = { /* do something */ }) {
+                    IconButton(onClick = { onProfilClick() }) {
                         Icon(
                             imageVector = Icons.Default.AccountCircle,
                             contentDescription = "Profil"
@@ -112,9 +113,7 @@ fun MainScreen(
                             selectedItem = index
                             when (index) {
                                 1 -> onPublishClick()
-                            }
-                            when (index) {
-                                2 -> onMyPostsClick()
+                                2 -> onProfilClick()
                             }
                         }
                     )

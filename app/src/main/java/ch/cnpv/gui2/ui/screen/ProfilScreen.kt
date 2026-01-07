@@ -8,6 +8,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.outlined.AddCircle
 import androidx.compose.material3.CenterAlignedTopAppBar
@@ -39,17 +40,17 @@ import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MyPostsScreen(
+fun ProfilScreen(
     posts: List<Post>,
-    onBackClick: () -> Unit,
+    onNavigateHome: () -> Unit,
+    onNavigatePublish: () -> Unit,
     onDelete: (Post) -> Unit,
     onPostClick: (Post) -> Unit,
 ) {
     var selectedItem by remember { mutableIntStateOf(2) }
-    val items = listOf("Accueil", "Publier", "Mes edits")
-    val icons = listOf(Icons.Filled.Menu, Icons.Outlined.AddCircle, Icons.Filled.Edit)
+    val items = listOf("Accueil", "Publier", "Profil")
+    val icons = listOf(Icons.Filled.Home, Icons.Outlined.AddCircle, Icons.Filled.AccountCircle)
     val coroutineScope = rememberCoroutineScope()
-
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -93,9 +94,9 @@ fun MyPostsScreen(
                         selected = selectedItem == index,
                         onClick = {
                             selectedItem = index
-
                             when (index) {
-                                0 -> onBackClick()
+                                0 -> onNavigateHome()
+                                1 -> onNavigatePublish()
                             }
                         }
                     )
