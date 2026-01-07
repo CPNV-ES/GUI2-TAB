@@ -1,6 +1,5 @@
 package ch.cnpv.gui2.ui.screen
 
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -38,16 +37,28 @@ import androidx.compose.material.icons.filled.Send
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.graphics.Color
+import androidx.compose.material3.TextField
+
+import ch.cnpv.gui2.models.Post
+
+import java.util.UUID
+import java.time.Instant
+
+import com.google.gson.annotations.SerializedName
 
 @OptIn(ExperimentalMaterial3Api::class)
-
 @Composable
 fun PublishScreen(
     isLoading: Boolean = false,
+    onSend: (Post) -> Unit = {}
 ) {
     var selectedItem by remember { mutableIntStateOf(0) }
     val items = listOf("Accueil", "Publier", "Recherche")
-    val icons = listOf(Icons.Filled.Menu, Icons.Outlined.AddCircle, Icons.Filled.Search)
+    val icons = listOf(
+        Icons.Filled.Menu,
+        Icons.Outlined.AddCircle,
+        Icons.Filled.Search
+    )
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -57,27 +68,15 @@ fun PublishScreen(
                     containerColor = MaterialTheme.colorScheme.primaryContainer,
                     titleContentColor = MaterialTheme.colorScheme.primary,
                 ),
-                title = {
-                    Text(
-                        "Duck Duck Social",
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                },
+                title = { Text("Duck Duck Social") },
                 actions = {
-                    IconButton(onClick = { /* do something */ }) {
-                        Icon(
-                            imageVector = Icons.Default.AccountCircle,
-                            contentDescription = "Profil"
-                        )
+                    IconButton(onClick = { }) {
+                        Icon(Icons.Default.AccountCircle, contentDescription = "Profil")
                     }
                 },
                 navigationIcon = {
-                    IconButton(onClick = { /* do something */ }) {
-                        Icon(
-                            imageVector = Icons.Filled.Menu,
-                            contentDescription = "Menu"
-                        )
+                    IconButton(onClick = { }) {
+                        Icon(Icons.Filled.Menu, contentDescription = "Menu")
                     }
                 },
             )
@@ -95,68 +94,86 @@ fun PublishScreen(
             }
         }
     ) { innerPadding ->
-        Column(modifier = Modifier.padding(innerPadding)) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
             if (isLoading) {
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    CircularProgressIndicator()
-                }
+                CircularProgressIndicator()
+            } else {
+                PublishForm(
+                    onSend = onSend,
+                    modifier = Modifier.fillMaxWidth(0.9f)
+                )
             }
         }
     }
 }
 
-@Composable
-fun PublishForm(onSend: (String) -> (Unit)) {
-    var text by remember { mutableStateOf("") }
 
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(8.dp),
-        verticalAlignment = Alignment.CenterVertically
+@Composable
+fun PublishForm(
+    onSend: (Post) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    var text by remember { mutableStateOf("") }
+    var imageId by remember { mutableStateOf<Int?>(null) }
+
+    Column(
+        modifier = modifier.padding(16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
         TextField(
             value = text,
             onValueChange = { text = it },
-            modifier = Modifier
-                .weight(1f),
+            modifier = Modifier.fillMaxWidth(),
             placeholder = { Text("Description de votre story") },
             singleLine = true,
-            shape = RoundedCornerShape(24.dp),
-            colors = TextFieldDefaults.textFieldColors(
-                containerColor = Color(0xFFF0F0F0),
-                focusedIndicatorColor = Color.Transparent,
-                unfocusedIndicatorColor = Color.Transparent
-            )
+            shape = RoundedCornerShape(24.dp)
         )
-        IconButton(
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        Button(onClick = { imageId = (1..100).random() }) {
+            Text(if (imageId == null) "Ajouter une image" else "Image sélectionnée : $imageId")
+        }
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        Button(
             onClick = {
-                onSend(text)
-                text = ""
+                if (text.isNotBlank() && imageId != null) {
+                    val newPost = Post(
+                        id = java.util.UUID.randomUUID().toString(),
+                        description = text,
+                        imageId = imageId!!,
+                        createdAt = java.time.Instant.now().toString(),
+                        updatedAt = java.time.Instant.now().toString()
+                    )
+                    onSend(newPost)
+                    text = ""
+                    imageId = null
+                }
             },
-            enabled = text.isNotBlank()
+            enabled = text.isNotBlank() && imageId != null
         ) {
-            Icon(
-                imageVector = Icons.Default.Send,
-                contentDescription = "Envoyer",
-                tint = if (text.isNotBlank())
-                    MaterialTheme.colorScheme.primary
-                else
-                    Color.Gray
-            )
+            Text("Publier")
         }
     }
 }
+
+
 
 @Preview(showBackground = true)
 @Composable
 fun PublishScreenPreview() {
     AppTheme {
         PublishScreen(
-
+            isLoading = false,
+            onSend = { println(it) }
         )
     }
 }
