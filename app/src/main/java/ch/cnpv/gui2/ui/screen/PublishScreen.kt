@@ -130,7 +130,7 @@ fun PublishForm(
             value = text,
             onValueChange = { text = it },
             modifier = Modifier.fillMaxWidth(),
-            placeholder = { Text("Description de votre story") },
+            placeholder = { Text("Description de votre post") },
             singleLine = true,
             shape = RoundedCornerShape(24.dp)
         )
