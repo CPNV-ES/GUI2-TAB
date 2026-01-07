@@ -1,15 +1,23 @@
 package ch.cnpv.gui2.ui
 
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import ch.cnpv.gui2.data.ProfilsData
 import ch.cnpv.gui2.models.Post
+import ch.cnpv.gui2.models.Profil
 import ch.cnpv.gui2.network.RetrofitInstance
 import ch.cnpv.gui2.ui.screen.MainScreen
 import ch.cnpv.gui2.ui.screen.DetailScreen
@@ -31,7 +39,7 @@ data class Detail(val postId: String)
 data class Story(val postId: String)
 
 @Serializable
-object Profil
+object ProfilScreen
 
 @Composable
 fun AppNavHost() {
@@ -39,39 +47,57 @@ fun AppNavHost() {
     var feedPosts by remember { mutableStateOf<List<Post>>(emptyList()) }
     var myPosts by remember { mutableStateOf<List<Post>>(emptyList()) }
     var isLoading by remember { mutableStateOf(true) }
+    var errorMessage by remember { mutableStateOf<String?>(null) }
 
-    LaunchedEffect(Unit) {
+    val availableProfils = ProfilsData.allProfils
+    var currentProfil by remember { mutableStateOf<Profil>(ProfilsData.getDefaultProfil()) }
+
+    LaunchedEffect(currentProfil) {
+        isLoading = true
+        errorMessage = null
+
         try {
-            val aliceId = "11111111-1111-1111-1111-111111111111"
+            myPosts = try {
+                RetrofitInstance.api.getPosts(currentProfil.id)
+            } catch (e: Exception) {
+                e.printStackTrace()
+                emptyList()
+            }
 
-            myPosts = RetrofitInstance.api.getPosts(aliceId)
+            val friends = try {
+                RetrofitInstance.api.getFriends(currentProfil.id)
+            } catch (e: Exception) {
+                e.printStackTrace()
+                emptyList()
+            }
 
-            val friends = RetrofitInstance.api.getFriends(aliceId)
-            val friendsPosts = friends.flatMap { friend ->
+            feedPosts = friends.flatMap { friend ->
                 try {
                     RetrofitInstance.api.getPosts(friend.id)
                 } catch (e: Exception) {
+                    e.printStackTrace()
                     emptyList()
                 }
             }
-
-            feedPosts = friendsPosts
-
         } catch (e: Exception) {
-            feedPosts = emptyList()
-            myPosts = emptyList()
+            errorMessage = "Erreur: ${e.message}"
+            e.printStackTrace()
         } finally {
             isLoading = false
         }
     }
-
-
 
     NavHost(navController, startDestination = Main) {
         composable<Main> {
             MainScreen(
                 posts = feedPosts,
                 isLoading = isLoading,
+                errorMessage = errorMessage,
+                currentProfil = currentProfil,
+                availableProfils = availableProfils,
+                onProfilSelected = { profil ->
+                    currentProfil = profil
+                },
                 onPostClick = { post ->
                     navController.navigate(Detail(post.id))
                 },
@@ -79,7 +105,7 @@ fun AppNavHost() {
                     navController.navigate(Story(post.id))
                 },
                 onProfilClick = {
-                    navController.navigate(Profil)
+                    navController.navigate(ProfilScreen)
                 },
                 onPublishClick = {
                     navController.navigate(Publish)
@@ -90,7 +116,6 @@ fun AppNavHost() {
         composable<Detail> { backStackEntry ->
             val detail = backStackEntry.arguments?.getString("postId") ?: return@composable
             val allPosts = feedPosts + myPosts
-
             val post = allPosts.firstOrNull { it.id == detail }
 
             if (post != null) {
@@ -98,6 +123,10 @@ fun AppNavHost() {
                     post = post,
                     onBackClick = { navController.navigateUp() }
                 )
+            } else {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    Text("Post non trouvé")
+                }
             }
         }
 
@@ -110,12 +139,21 @@ fun AppNavHost() {
                     post = post,
                     onFinished = { navController.navigateUp() }
                 )
+            } else {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    Text("Story non trouvée")
+                }
             }
         }
 
-        composable<Profil> {
+        composable<ProfilScreen> {
             ProfilScreen(
                 posts = myPosts,
+                currentProfil = currentProfil,
+                availableProfils = availableProfils,
+                onProfilSelected = { profil ->
+                    currentProfil = profil
+                },
                 onNavigateHome = {
                     navController.navigate(Main) {
                         popUpTo(Main) { inclusive = false }
@@ -135,6 +173,11 @@ fun AppNavHost() {
 
         composable<Publish> {
             PublishScreen(
+                currentProfil = currentProfil,
+                availableProfils = availableProfils,
+                onProfilSelected = { profil ->
+                    currentProfil = profil
+                },
                 onSuccess = { newPost ->
                     myPosts = listOf(newPost) + myPosts
                 },
@@ -144,7 +187,7 @@ fun AppNavHost() {
                     }
                 },
                 onNavigateProfil = {
-                    navController.navigate(Profil)
+                    navController.navigate(ProfilScreen)
                 }
             )
         }

@@ -32,7 +32,7 @@ class PublishViewModel : ViewModel() {
         context: Context,
         description: String,
         imageUri: Uri,
-        profilId: String = "11111111-1111-1111-1111-111111111111"
+        profilId: String
     ) {
         viewModelScope.launch {
             try {

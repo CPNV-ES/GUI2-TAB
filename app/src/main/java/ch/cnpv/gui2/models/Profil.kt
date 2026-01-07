@@ -1,7 +1,9 @@
 package ch.cnpv.gui2.models
 
 import com.google.gson.annotations.SerializedName
+import kotlinx.serialization.Serializable
 
+@Serializable
 data class Profil(
     val id: String,
     val name: String,

@@ -21,7 +21,6 @@ import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Menu
-import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.outlined.AddCircle
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -52,14 +51,20 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import ch.cnpv.gui2.models.Post
+import ch.cnpv.gui2.models.Profil
 import ch.cnpv.gui2.ui.components.ProfileImage
 import ch.cnpv.gui2.ui.components.PostImage
+import ch.cnpv.gui2.ui.components.ProfileSwitcher
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainScreen(
     posts: List<Post>,
     isLoading: Boolean = false,
+    errorMessage: String? = null,
+    currentProfil: Profil?,
+    availableProfils: List<Profil>,
+    onProfilSelected: (Profil) -> Unit,
     onPostClick: (Post) -> Unit,
     onStoryClick: (Post) -> Unit,
     onProfilClick: () -> Unit,
@@ -85,12 +90,11 @@ fun MainScreen(
                     )
                 },
                 actions = {
-                    IconButton(onClick = { onProfilClick() }) {
-                        Icon(
-                            imageVector = Icons.Default.AccountCircle,
-                            contentDescription = "Profil"
-                        )
-                    }
+                    ProfileSwitcher(
+                        currentProfil = currentProfil,
+                        availableProfils = availableProfils,
+                        onProfilSelected = onProfilSelected
+                    )
                 },
                 navigationIcon = {
                     IconButton(onClick = { /* do something */ }) {
@@ -122,12 +126,41 @@ fun MainScreen(
         }
     ) { innerPadding ->
         Column(modifier = Modifier.padding(innerPadding)) {
+            if (errorMessage != null) {
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.errorContainer
+                    )
+                ) {
+                    Text(
+                        text = errorMessage,
+                        color = MaterialTheme.colorScheme.onErrorContainer,
+                        style = MaterialTheme.typography.bodyMedium,
+                        modifier = Modifier.padding(16.dp)
+                    )
+                }
+            }
+
             if (isLoading) {
                 Box(
                     modifier = Modifier.fillMaxSize(),
                     contentAlignment = Alignment.Center
                 ) {
                     CircularProgressIndicator()
+                }
+            } else if (posts.isEmpty() && errorMessage == null) {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = "Aucune publication à afficher",
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
                 }
             } else {
                 CarouselStories(posts = posts) { post -> onStoryClick(post) }

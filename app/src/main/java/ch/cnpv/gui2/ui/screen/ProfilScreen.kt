@@ -42,6 +42,9 @@ import kotlinx.coroutines.launch
 @Composable
 fun ProfilScreen(
     posts: List<Post>,
+    currentProfil: ch.cnpv.gui2.models.Profil?,
+    availableProfils: List<ch.cnpv.gui2.models.Profil>,
+    onProfilSelected: (ch.cnpv.gui2.models.Profil) -> Unit,
     onNavigateHome: () -> Unit,
     onNavigatePublish: () -> Unit,
     onDelete: (Post) -> Unit,
@@ -68,12 +71,11 @@ fun ProfilScreen(
                     )
                 },
                 actions = {
-                    IconButton(onClick = { /* do something */ }) {
-                        Icon(
-                            imageVector = Icons.Default.AccountCircle,
-                            contentDescription = "Profil"
-                        )
-                    }
+                    ch.cnpv.gui2.ui.components.ProfileSwitcher(
+                        currentProfil = currentProfil,
+                        availableProfils = availableProfils,
+                        onProfilSelected = onProfilSelected
+                    )
                 },
                 navigationIcon = {
                     IconButton(onClick = { /* do something */ }) {

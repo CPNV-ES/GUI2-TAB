@@ -9,18 +9,15 @@ import retrofit2.http.*
 
 interface ApiService {
 
-    // Profils
     @GET("profils")
     suspend fun getProfils(): List<Profil>
 
     @GET("profils/{id}")
     suspend fun getProfil(@Path("id") id: String): Profil
 
-    // Friends
     @GET("profils/{id}/friends")
     suspend fun getFriends(@Path("id") id: String): List<Profil>
 
-    // Posts
     @GET("profils/{id}/posts")
     suspend fun getPosts(@Path("id") id: String): List<Post>
 
@@ -36,7 +33,12 @@ interface ApiService {
         @Path("post_id") postId: String
     )
 
-    // Create a post with image (multipart)
+    @GET("posts/{id}/comments")
+    suspend fun getComments(@Path("id") id: String): List<Comment>
+
+    @POST("profils/{id}/posts")
+    suspend fun postPost(@Path("id") id: String): Post
+
     @Multipart
     @POST("profils/{id}/posts")
     suspend fun createPostWithImage(
@@ -44,8 +46,4 @@ interface ApiService {
         @Part("description") description: RequestBody,
         @Part image: MultipartBody.Part
     ): Post
-
-    // Comments
-    @GET("posts/{id}/comments")
-    suspend fun getComments(@Path("id") id: String): List<Comment>
 }

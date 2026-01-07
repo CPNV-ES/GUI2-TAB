@@ -25,6 +25,9 @@ import coil3.request.crossfade
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PublishScreen(
+    currentProfil: ch.cnpv.gui2.models.Profil?,
+    availableProfils: List<ch.cnpv.gui2.models.Profil>,
+    onProfilSelected: (ch.cnpv.gui2.models.Profil) -> Unit,
     onSuccess: (Post) -> Unit = {},
     onNavigateHome: () -> Unit = {},
     onNavigateProfil: () -> Unit = {},
@@ -44,9 +47,11 @@ fun PublishScreen(
                 ),
                 title = { Text("Duck Duck Social") },
                 actions = {
-                    IconButton(onClick = { onNavigateProfil() }) {
-                        Icon(Icons.Default.AccountCircle, contentDescription = "Profil")
-                    }
+                    ch.cnpv.gui2.ui.components.ProfileSwitcher(
+                        currentProfil = currentProfil,
+                        availableProfils = availableProfils,
+                        onProfilSelected = onProfilSelected
+                    )
                 },
                 navigationIcon = {
                     IconButton(onClick = { }) {
@@ -76,6 +81,7 @@ fun PublishScreen(
     ) { innerPadding ->
         PublishForm(
             viewModel = viewModel,
+            currentProfil = currentProfil,
             onSuccess = onSuccess,
             onBackClick = onNavigateHome,
             modifier = Modifier
@@ -88,6 +94,7 @@ fun PublishScreen(
 @Composable
 fun PublishForm(
     viewModel: PublishViewModel,
+    currentProfil: ch.cnpv.gui2.models.Profil?,
     onSuccess: (Post) -> Unit,
     onBackClick: () -> Unit,
     modifier: Modifier = Modifier
@@ -186,16 +193,17 @@ fun PublishForm(
 
         Button(
             onClick = {
-                if (imageUri != null) {
+                if (imageUri != null && currentProfil != null) {
                     viewModel.publishPost(
                         context = context,
                         description = description,
-                        imageUri = imageUri!!
+                        imageUri = imageUri!!,
+                        profilId = currentProfil.id
                     )
                 }
             },
             modifier = Modifier.fillMaxWidth(),
-            enabled = description.isNotBlank() && imageUri != null && !uiState.isLoading
+            enabled = description.isNotBlank() && imageUri != null && !uiState.isLoading && currentProfil != null
         ) {
             if (uiState.isLoading) {
                 CircularProgressIndicator(

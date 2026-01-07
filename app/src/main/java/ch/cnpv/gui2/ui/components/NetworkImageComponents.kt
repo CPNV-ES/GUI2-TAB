@@ -11,14 +11,6 @@ import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
 import coil3.request.crossfade
 
-/**
- * Composable pour afficher une image depuis une URL avec gestion d'erreur
- * @param imageUrl L'URL de l'image
- * @param contentDescription Description pour l'accessibilité
- * @param modifier Modificateurs Compose
- * @param contentScale Comment l'image doit être mise à l'échelle
- * @param placeholderRes Ressource drawable pour le placeholder (par défaut: default_placeholder)
- */
 @Composable
 fun NetworkImage(
     imageUrl: String?,
@@ -28,7 +20,6 @@ fun NetworkImage(
     placeholderRes: Int = R.drawable.default_placeholder
 ) {
     if (imageUrl.isNullOrBlank()) {
-        // Utiliser le placeholder si pas d'URL
         Image(
             painter = painterResource(placeholderRes),
             contentDescription = contentDescription,
@@ -50,9 +41,6 @@ fun NetworkImage(
     }
 }
 
-/**
- * Composable spécifique pour les images de profil
- */
 @Composable
 fun ProfileImage(
     imageUrl: String?,
@@ -69,9 +57,6 @@ fun ProfileImage(
     )
 }
 
-/**
- * Composable spécifique pour les images de post
- */
 @Composable
 fun PostImage(
     imageUrl: String?,
