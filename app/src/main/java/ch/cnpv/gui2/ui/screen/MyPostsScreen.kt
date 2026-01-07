@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Menu
@@ -46,8 +45,8 @@ fun MyPostsScreen(
     onDelete: (Post) -> Unit,
     onPostClick: (Post) -> Unit,
 ) {
-    var selectedItem by remember { mutableIntStateOf(0) }
-    val items = listOf("Retour", "Publier", "Mes edits")
+    var selectedItem by remember { mutableIntStateOf(2) }
+    val items = listOf("Accueil", "Publier", "Mes edits")
     val icons = listOf(Icons.Filled.Menu, Icons.Outlined.AddCircle, Icons.Filled.Edit)
     val coroutineScope = rememberCoroutineScope()
 
@@ -76,10 +75,10 @@ fun MyPostsScreen(
                     }
                 },
                 navigationIcon = {
-                    IconButton(onClick = { onBackClick() }) {
+                    IconButton(onClick = { /* do something */ }) {
                         Icon(
-                            imageVector = Icons.Default.ArrowBack,
-                            contentDescription = "Retour"
+                            imageVector = Icons.Filled.Menu,
+                            contentDescription = "Menu"
                         )
                     }
                 },
@@ -94,6 +93,10 @@ fun MyPostsScreen(
                         selected = selectedItem == index,
                         onClick = {
                             selectedItem = index
+
+                            when (index) {
+                                0 -> onBackClick()
+                            }
                         }
                     )
                 }
@@ -122,4 +125,3 @@ fun MyPostsScreen(
         }
     }
 }
-
