@@ -63,7 +63,8 @@ fun MainScreen(
     posts: List<Post>,
     isLoading: Boolean = false,
     onPostClick: (Post) -> Unit,
-    onStoryClick: (Post) -> Unit
+    onStoryClick: (Post) -> Unit,
+    onPublishClick: () -> Unit
 ) {
     var selectedItem by remember { mutableIntStateOf(0) }
     val items = listOf("Accueil", "Publier", "Recherche")
@@ -109,7 +110,13 @@ fun MainScreen(
                         icon = { Icon(icons[index], contentDescription = item) },
                         label = { Text(item) },
                         selected = selectedItem == index,
-                        onClick = { selectedItem = index }
+                        onClick = {
+                            selectedItem = index
+
+                            when (index) {
+                                1 -> onPublishClick()
+                            }
+                        }
                     )
                 }
             }

@@ -13,11 +13,15 @@ import ch.cnpv.gui2.models.Post
 import ch.cnpv.gui2.network.RetrofitInstance
 import ch.cnpv.gui2.ui.screen.MainScreen
 import ch.cnpv.gui2.ui.screen.DetailScreen
+import ch.cnpv.gui2.ui.screen.PublishScreen
 import ch.cnpv.gui2.ui.screen.StoryScreen
 import kotlinx.serialization.Serializable
 
 @Serializable
 object Main
+
+@Serializable
+object Publish
 
 @Serializable
 data class Detail(val postId: String)
@@ -63,6 +67,9 @@ fun AppNavHost() {
                 },
                 onStoryClick = { post ->
                     navController.navigate(Story(post.id))
+                },
+                onPublishClick = {
+                    navController.navigate(Publish)
                 }
             )
         }
@@ -89,6 +96,12 @@ fun AppNavHost() {
                     onFinished = { navController.navigateUp() }
                 )
             }
+        }
+        composable<Publish> {
+            PublishScreen(
+                isLoading = false,
+                onSend = { println(it) }
+            )
         }
     }
 }

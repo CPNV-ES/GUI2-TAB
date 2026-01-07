@@ -164,16 +164,3 @@ fun PublishForm(
         }
     }
 }
-
-
-
-@Preview(showBackground = true)
-@Composable
-fun PublishScreenPreview() {
-    AppTheme {
-        PublishScreen(
-            isLoading = false,
-            onSend = { println(it) }
-        )
-    }
-}
