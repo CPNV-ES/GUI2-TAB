@@ -56,10 +56,11 @@ interface ApiService {
         @Part image: MultipartBody.Part
     ): Post
 
+    @Multipart
     @PUT("profils/{id}/posts/{post_id}")
     suspend fun updatePost(
         @Path("id") profilId: String,
         @Path("post_id") postId: String,
-        @Body description: RequestBody
+        @Part("description") description: RequestBody
     ): Post
 }
