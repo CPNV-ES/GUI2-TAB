@@ -1,0 +1,161 @@
+package ch.cnpv.gui2.ui.screen
+
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.foundation.layout.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
+import androidx.compose.runtime.*
+import kotlinx.coroutines.delay
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.ui.draw.clip
+import androidx.compose.material3.Text
+import ch.cnpv.gui2.models.Post
+import ch.cnpv.gui2.ui.components.PostImage
+import ch.cnpv.gui2.ui.components.ProfileImage
+
+@Composable
+fun StoryScreen(
+    post: Post,
+    currentStep: Int = 0,
+    onFinished: () -> Unit = {}
+) {
+    val storyImages = listOf(post.imageUrl)
+
+    var step by remember { mutableStateOf(currentStep) }
+    var progress by remember { mutableStateOf(0f) }
+    val isPressed = remember { mutableStateOf(false) }
+    val steps = storyImages.size
+
+    val previousScreen = {
+        if (step > 0) step--
+    }
+    val nextScreen = {
+        if (step < steps - 1) step++
+    }
+
+    LaunchedEffect(step) {
+        progress = 0f
+        while (progress < 1f && !isPressed.value) {
+            delay(50)
+            progress += 0.01f
+        }
+        if (!isPressed.value) {
+            if (step < steps - 1) step++
+            else onFinished()
+        }
+    }
+
+    Scaffold { paddingValues ->
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+                .pointerInput(Unit) {
+                    detectTapGestures(
+                        onPress = { offset ->
+                            val maxWidth = size.width
+                            val pressStart = System.currentTimeMillis()
+                            isPressed.value = true
+
+                            tryAwaitRelease()
+
+                            val pressEnd = System.currentTimeMillis()
+                            val duration = pressEnd - pressStart
+
+                            if (duration < 200) {
+                                if (offset.x > maxWidth / 2f) nextScreen()
+                                else previousScreen()
+                            }
+                            isPressed.value = false
+                        }
+                    )
+                }
+        ) {
+
+            PostImage(
+                imageUrl = storyImages[step],
+                contentDescription = "Story de ${post.profil.name}",
+                modifier = Modifier.fillMaxSize(),
+                contentScale = ContentScale.Crop
+            )
+
+            Row(
+                modifier = Modifier
+                    .align(Alignment.TopStart)
+                    .padding(top = 25.dp, start = 16.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                ProfileImage(
+                    imageUrl = post.profil.imageUrl,
+                    contentDescription = "Avatar de ${post.profil.name}",
+                    modifier = Modifier
+                        .size(40.dp)
+                        .clip(CircleShape),
+                    contentScale = ContentScale.Crop
+                )
+
+                Spacer(modifier = Modifier.width(12.dp))
+
+                Text(
+                    text = post.profil.name,
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = Color.White
+                )
+            }
+
+            StoryProgressBar(
+                steps = steps,
+                currentStep = step,
+                progress = progress,
+                modifier = Modifier
+                    .align(Alignment.TopCenter)
+                    .padding(top = 10.dp)
+            )
+        }
+    }
+}
+
+@Composable
+fun StoryProgressBar(
+    steps: Int,
+    currentStep: Int,
+    progress: Float,
+    modifier: Modifier = Modifier
+) {
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(horizontal = 8.dp),
+        horizontalArrangement = Arrangement.spacedBy(4.dp)
+    ) {
+        repeat(steps) { index ->
+            val barProgress = when {
+                index < currentStep -> 1f
+                index == currentStep -> progress
+                else -> 0f
+            }
+
+            LinearProgressIndicator(
+                progress = { barProgress },
+                modifier = Modifier
+                    .weight(1f)
+                    .height(4.dp),
+                color = Color.White,
+                trackColor = Color.Gray.copy(alpha = 0.3f),
+                drawStopIndicator = {}
+            )
+        }
+    }
+}
