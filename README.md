@@ -7,7 +7,7 @@ Social network Android application built with Kotlin and Jetpack Compose.
 ### Required Backend API
 This app requires the Laravel API backend to function.
 
-**API Repository**: [(https://github.com/CPNV-ES/NOS1-TAB)]
+**API Repository**: https://github.com/CPNV-ES/NOS1-TAB
 
 Start the API:
 ```bash
@@ -18,7 +18,7 @@ php artisan serve
 API must be accessible at `http://10.0.2.2:8000` (Android emulator) or your local IP for physical devices.
 
 ### Design
-**Figma**: [(https://www.figma.com/design/0MDHG1lZ40UIJkYKcJOlj0/main-page?node-id=3-1514&t=tBEH1IV0HXV71Sud-0)]
+**Figma**: https://www.figma.com/design/0MDHG1lZ40UIJkYKcJOlj0/main-page?node-id=3-1514&t=tBEH1IV0HXV71Sud-0
 
 ### Requirements
 - Android Studio Hedgehog (2023.1.1) or newer
